@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+		<!-- Google Chrome Frame也可以让IE用上Chrome的引擎: -->
+		<meta name="renderer" content="webkit">
+		<!--国产浏览器高速模式-->
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="author" content="穷在闹市" />
+		<!-- 作者 -->
+		<meta name="revised" content="穷在闹市.v3, 2019/05/01" />
+		<!-- 定义页面的最新版本 -->
+		<meta name="description" content="网站简介" />
+		<!-- 网站简介 -->
+		<meta name="keywords" content="搜索关键字，以半角英文逗号隔开" />
+		<title>穷在闹市出品</title>
+
+		<!-- 公共样式 开始 -->
+		<link rel="stylesheet" type="text/css" href="../../css/base.css">
+		<link rel="stylesheet" type="text/css" href="../../css/iconfont.css">
+		<script type="text/javascript" src="../../framework/jquery-1.11.3.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="../../layui/css/layui.css">
+		<script type="text/javascript" src="../../layui/layui.js"></script>
+		<!-- 滚动条插件 -->
+		<link rel="stylesheet" type="text/css" href="../../css/jquery.mCustomScrollbar.css">
+		<script src="../../framework/jquery-ui-1.10.4.min.js"></script>
+		<script src="../../framework/jquery.mousewheel.min.js"></script>
+		<script src="../../framework/jquery.mCustomScrollbar.min.js"></script>
+		<script src="../../framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
+		<!-- 公共样式 结束 -->
+		<!--js和vue引入-->
+		<script type="text/javascript" src="../../js/vue.js"></script>
+		<script type="text/javascript" src="../../js/axios.min.js"></script>
+		<script type="text/javascript" src="../../js/util.js"></script>
+		<style>
+			.layui-table img {
+			    max-width: none;
+			}
+		</style>
+
+	</head>
+
+	<body>
+		<div id="myVue">
+			<div class="cBody">
+				<div class="console">
+					<form class="layui-form" >
+						<div class="layui-form-item">
+							<div class="layui-input-inline">
+								<input type="text" v-model="goods.goodsName" required lay-verify="required" placeholder="输入商品名称" autocomplete="off" class="layui-input">
+							</div>
+							<div class="layui-input-inline">
+								<input type="text" v-model="goods.goodsSpecs" required lay-verify="required" placeholder="输入规格大小" autocomplete="off" class="layui-input">
+							</div>
+							<div class="layui-input-inline">
+								<input type="text" v-model="goods.goodsPlace" required lay-verify="required" placeholder="输入产地名称" autocomplete="off" class="layui-input">
+							</div>
+							<button  type="button" class="layui-btn" lay-filter="formDemo" @click="query()">检索</button>
+							<a class="layui-btn">导入商品</a>
+						</div>
+					</form>
+
+				</div>
+
+				<table class="layui-table">
+					<thead>
+						<tr>
+							<th>序号</th>
+							<th>商品名称</th>
+							<th>商品规格</th>
+							<th>计量单位</th>
+							<th>商品产地</th>
+							<th>商品编码</th>
+							<th>商品价格</th>
+							<th>条形码编号</th>
+							<th>厂家电话</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr v-for="(i,index) in goodss">
+							<td>{{index+1}}</td>
+							<td>{{i.goodsName}}</td>
+							<td>{{i.goodsSpecs}}</td>
+							<td>{{i.goodsUnit}}</td>
+							<td>{{i.goodsPlace}}</td>
+							<td>{{i.goodsCode}}</td>
+							<td>{{i.goodsPrice}}</td>
+							<td>{{i.goodsBarcode}}</td>
+							<td>{{i.goodsTell}}</td>
+							<td>
+								<button class="layui-btn layui-btn-xs" onclick="updateBut()">修改</button>
+								<button class="layui-btn layui-btn-xs" @click="creatImage(i)">生成图片</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<script type="text/javascript">
+			new Vue({
+				el:"#myVue",
+				data:{
+					goodss:[],
+					goods:{
+						goodsName:"",
+						goodsSpecs:"",
+						goodsPlace:""
+					}
+				},
+				methods:{
+					query:function(){
+						if(this.goods.goodsName ==""){
+							this.goods.goodsName == null;
+						}
+						if(this.goods.goodsSpecs == ""){
+							this.goods.goodsSpecs == null;
+						}
+						if(this.goods.goodsPlace == ""){
+							this.goods.goodsPlace == null;
+						}
+						sendAxios(
+							"goods/getAllGoods",
+							this.goods
+						).then(res=>{
+							if(res.data.code==200){
+								this.goodss = res.data.list;
+							}else{
+								alert("查询数据失败！")
+							}
+						}).catch(res=>{
+							alert("函数执行失败！")
+						})
+					},
+					creatImage:function(one){
+						sendAxios(
+							"image/creatImg",
+							one
+						).then(res=>{
+							if(res.data.code==200){
+								console.log(res.data.msg);
+								alert("图片生成成功，请移步图片管理查看和操作！");
+							}else{
+								alert("图片生成失败！")
+							}
+						}).catch(res=>{
+							alert("函数执行失败！")
+						})
+					}
+				},
+				created:function(){
+					this.query();
+				}
+			});
+		</script>
+	</body>
+
+</html>

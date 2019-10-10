@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+		<!-- Google Chrome Frame也可以让IE用上Chrome的引擎: -->
+		<meta name="renderer" content="webkit">
+		<!--国产浏览器高速模式-->
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- 网站简介 -->
+		<title>BlueToothPrice V1.0</title>
+
+		<!-- 公共样式 开始 -->
+		<link rel="stylesheet" type="text/css" href="../../css/base.css">
+		<link rel="stylesheet" type="text/css" href="../../css/iconfont.css">
+		<script type="text/javascript" src="../../framework/jquery-1.11.3.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="../../layui/css/layui.css">
+		<script type="text/javascript" src="../../layui/layui.js"></script>
+		<!-- 滚动条插件 -->
+		<link rel="stylesheet" type="text/css" href="../../css/jquery.mCustomScrollbar.css">
+		<script src="../../framework/jquery-ui-1.10.4.min.js"></script>
+		<script src="../../framework/jquery.mousewheel.min.js"></script>
+		<script src="../../framework/jquery.mCustomScrollbar.min.js"></script>
+		<script src="../../framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
+		<!-- 公共样式 结束 -->
+		<!--js和vue引入-->
+		<script type="text/javascript" src="../../js/vue.js"></script>
+		<script type="text/javascript" src="../../js/axios.min.js"></script>
+		<script type="text/javascript" src="../../js/util.js"></script>
+		<style>
+			.layui-form-label{
+				width: 100px;
+			}
+			.layui-input-block{
+				margin-left: 130px;
+			}
+			.layui-form{
+				margin-right: 30%;
+			}
+		</style>
+
+	</head>
+
+	<body>
+		<div id="myVue">
+			<div class="cBody">
+				<form id="addForm" class="layui-form">
+					<div class="layui-form-item">
+						<label class="layui-form-label">商品名称</label>
+						<div class="layui-input-block">
+							<input type="text" v-model="goods.goodsName" required lay-verify="required"  placeholder="输入商品名称，例：美汁源果粒果汁" autocomplete="off" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">商品规格</label>
+						<div class="layui-input-block">
+							<input type="text" v-model="goods.goodsSpecs" required lay-verify="required" placeholder="例：350" autocomplete="off" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">计量单位</label>
+						<div class="layui-input-block">
+							<input type="text" v-model="goods.goodsUnit" required lay-verify="required" placeholder="例：ml,l,kg,g" autocomplete="off" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">生产地</label>
+						<div class="layui-input-block">
+							<input type="text" v-model="goods.goodsPlace" required lay-verify="required" placeholder="例：重庆" autocomplete="off" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">商品编码</label>
+						<div class="layui-input-block">
+							<input type="text" v-model="goods.goodsCode" required lay-verify="required" placeholder="例：068078" autocomplete="off" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">商品价格</label>
+						<div class="layui-input-block">
+							<input type="text" v-model="goods.goodsPrice" required lay-verify="required" placeholder="计量单位默认为：元；输入数字即可，例：335.52" autocomplete="off" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">产品条形码编码</label>
+						<div class="layui-input-block">
+							<input type="text" v-model="goods.goodsBarcode" required lay-verify="required" placeholder="例：1234567890123" autocomplete="off" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">单位电话</label>
+						<div class="layui-input-block">
+							<input type="text" v-model="goods.goodsTell" required lay-verify="required" placeholder="例：4000230033" autocomplete="off" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<div class="layui-input-block">
+							<button type="button" class="layui-btn"  @click="submitGoods">立即提交</button>
+							<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+
+		<script type="text/javascript">
+			new Vue({
+				el:"#myVue",
+				data:{
+					goods:{}
+				},
+				methods:{
+					submitGoods:function(){
+						sendAxios(
+							"goods/insertGoods",
+							this.goods
+						).then(res=>{
+							if(res.data.code==200){
+								alert("添加商品信息成功！");
+								location.reload();
+							}else{
+								alert("添加商品信息失败！")
+							}
+						}).catch(res=>{
+							alert("函数执行失败！")
+						})
+					}
+				}
+			});
+		</script>
+	</body>
+
+</html>

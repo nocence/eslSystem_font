@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>myTest</title>
+
+    <script src="js/jquery-1.11.3.js"></script>
+    <script src="js/vue.js"></script>
+    <script src="js/axios.min.js"></script>
+    <script src="js/util.js"></script>
+
+</head>
+<body>
+    <div id="myVue">
+        请输入相关信息：<br>
+        标题:<input placeholder="如：美汁源果粒果汁" v-model="ImgInfo.title"><br>
+        单位:<input placeholder="如：GE" v-model="ImgInfo.unit"><br>
+        规格:<input placeholder="如：420ML" v-model="ImgInfo.specs"><br>
+        产地:<input placeholder="如：武汉" v-model="ImgInfo.place"><br>
+        编码:<input placeholder="如：068078" v-model="ImgInfo.code"><br>
+        价格:<input placeholder="如：33.40" v-model="ImgInfo.price"><br>
+        条形码号码:<input placeholder="如：1234567890123" v-model="ImgInfo.barcode"><br>
+        电话:<input placeholder="4006068768" v-model="ImgInfo.tellphone"><br>
+        <button type="button" @click="submitinfo()">提交</button>
+        图形地址：<br>
+        <template>
+            <img v-bind:src="ImgPath.imgPath"/>
+        </template>
+        发送到硬件端：
+            <button type="button" @click="sendInfo()">确定发送</button>
+    </div>
+<script type="text/javascript">
+    new Vue({
+        el:"#myVue",
+        data:{
+            ImgInfo:{},
+            ImgPath:{
+                imgPath:""
+            }
+        },
+        methods:{
+            submitinfo:function(){
+                sendAxios(
+                    "user/imginfo",
+                    this.ImgInfo
+                ).then(res=>{
+                    if(res.data.code==200){
+                        this.ImgPath.imgPath=res.data.msg;
+                    }else{
+                        alert("已成功执行函数，但回调出错");
+                    }
+                }).catch(res=>{
+                    alert("函数执行失败")
+                })
+            },
+            sendInfo:function () {
+                sendAxios(
+                    "user/sendinfo",
+                    {}
+                ).then(res=>{
+                    if(res.data.code==200){
+                        alert("发送成功")
+                    }else{
+                        alert("发送失败")
+                    }
+                }).catch(res=>{
+                    alert("函数执行失败")
+                })
+            }
+        }
+    })
+</script>
+</body>
+</html>

@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+  <!-- Google Chrome Frame也可以让IE用上Chrome的引擎: -->
+  <meta name="renderer" content="webkit">
+  <!--国产浏览器高速模式-->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- 网站简介 -->
+  <meta name="keywords" content="搜索关键字，以半角英文逗号隔开"/>
+  <title>BlueToothPrice V1.0</title>
+
+  <!-- 公共样式 开始 -->
+  <link rel="stylesheet" type="text/css" href="/static/css/base.css">
+  <link rel="stylesheet" type="text/css" href="/static/css/iconfont.css">
+  <script type="text/javascript" src="/static/framework/jquery-1.11.3.min.js"></script>
+  <link rel="stylesheet" type="text/css" href="/static/layui/css/layui.css">
+  <script type="text/javascript" src="/static/layui/layui.js"></script>
+  <!-- 滚动条插件 -->
+  <link rel="stylesheet" type="text/css" href="/static/css/jquery.mCustomScrollbar.css">
+  <script src="/static/framework/jquery-ui-1.10.4.min.js"></script>
+  <script src="/static/framework/jquery.mousewheel.min.js"></script>
+  <script src="/static/framework/jquery.mCustomScrollbar.min.js"></script>
+  <script src="/static/framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
+  <!-- 公共样式 结束 -->
+  <!--js和vue引入-->
+  <script type="text/javascript" src="../../js/vue.js"></script>
+  <script type="text/javascript" src="../../js/axios.min.js"></script>
+  <script type="text/javascript" src="../../js/util.js"></script>
+  <!--bootstrap引入-->
+  <script type="text/javascript" src="../../js/jquery-1.11.3.js"></script>
+  <script type="text/javascript" src="../../js/bootstrap.js"></script>
+  <link rel="stylesheet" type="text/css" href="../../css/bootstrap.css">
+</head>
+
+<body>
+<div id="myVue">
+  <div class="cBody">
+    <div class="console">
+      <form class="layui-form" action="">
+        <div class="layui-form-item">
+          <div class="layui-input-inline">
+            <input type="text" v-model="goods.goodsName" required lay-verify="required" placeholder="输入商品名称"
+                   autocomplete="off" class="layui-input">
+          </div>
+          <div class="layui-input-inline">
+            <input type="text" v-model="goods.goodsSpecs" required lay-verify="required" placeholder="输入商品规格"
+                   autocomplete="off" class="layui-input">
+          </div>
+          <button type="button" class="layui-btn" @click="query()">检索</button>
+        </div>
+      </form>
+    </div>
+
+    <table class="layui-table">
+      <thead>
+      <tr>
+        <th><input type="checkbox" @click="chooseAll()"></th>
+        <th>序号</th>
+        <th>商品名称</th>
+        <th>商品规格</th>
+        <th>计量单位</th>
+        <th>图片名称</th>
+        <th>图片预览</th>
+        <th>操作</th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr v-for="(image,index) in images">
+        <td><input type="checkbox" :checked="image.choose" @click="image.choose = !image.choose"></td>
+        <td>{{index+1}}</td>
+        <td>{{image.goodsName}}</td>
+        <td>{{image.goodsSpecs}}</td>
+        <td>{{image.goodsUnit}}</td>
+        <td>{{image.imageName}}</td>
+        <td><img :src="'data:image/bmp;base64,'+image.imageUrl"></td>
+        <td>
+          <button class="layui-btn layui-btn-xs" type="button" data-toggle="modal" data-target="#myModal"
+                  @click="getAllStores(image)">发送图片
+          </button>
+          <button class="layui-btn layui-btn-xs" type="button" data-toggle="modal" data-target="#deleteModal"
+                  @click="deleteimg(image)">删除图片
+          </button>
+        </td>
+      </tr>
+      </tbody>
+    </table>
+    <button class="layui-btn" type="button" data-toggle="modal" style="float: right" data-target="#mateModal" @click="getAllStoresInMate">批量发送</button>
+  </div>
+
+  <!--模态框-->
+  <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title text-center" id="myModalLabel">发送图片到标签</h4>
+        </div>
+        <div class="modal-body">
+          <div class="row cl">
+            <span class="input-group-addon" id="basic-addon1">选择门店</span>
+            <select class="select" size="1" v-model="storeWifis.storeName" @change="getWifis">
+              <option value="">--请选择--</option>
+              <option :value="i.storeName" v-for="i in stores">{{i.storeName}}</option>
+            </select>
+          </div>
+          <div class="row cl">
+            <span class="input-group-addon" id="basic-addon2">选择WIFI</span>
+            <select class="select" size="1" v-model="wifiTags.wifiIp" @change="getTags(wifiTags)">
+              <option value="">--请选择--</option>
+              <option :value="i.wifiIp" v-for="i in allWifis">{{i.wifiIp}}</option>
+            </select>
+          </div>
+          <div class="row cl">
+            <span class="input-group-addon" id="basic-addon3">选择MAC地址</span>
+            <select class="select" size="1" v-model="wifi.macAddress">
+              <option value="">--请选择--</option>
+              <option :value="i.macAddress" v-for="i in allTags">{{i.macAddress}}</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+          <button type="button" class="btn btn-primary" @click="sendImage" @change="sendHeart">确认发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title text-center" id="myModalLabel1">确定要删除图片吗？</h4>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+          <button type="button" class="btn btn-primary" @click="sendDeleteImage">确认删除</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal fade text-center" id="mateModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel2" aria-hidden="true" >
+      <div class="modal-dialog" style="display: inline-block;width: auto;">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                  <h4 class="modal-title text-center" id="myModalLabel2">匹配Mac</h4>
+              </div>
+              <div class="modal-body">
+                  <table class="layui-table">
+                      <thead>
+                          <tr>
+                              <th>图片名</th>
+                              <th>图片预览</th>
+                              <th>选择门店</th>
+                              <th>选择WIFI</th>
+                              <th>选择MAC</th>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          <tr v-for="item in hasChoosedData">
+                            <td>{{item.imageName}}</td>
+                            <td><img :src="'data:image/bmp;base64,'+item.imageUrl"></td>
+                            <td>
+                              <select class="select" size="1" v-model="item.storeName" @change="getMateWifis(item)">
+                                <option value="">--请选择--</option>
+                                <option :value="i.storeName" v-for="i in item.stores">{{i.storeName}}</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="select" size="1" v-model="item.wifiIp" @change="getMateTags(item)">
+                                <option value="">--请选择--</option>
+                                <option :value="i.wifiIp" v-for="i in item.allWifis">{{i.wifiIp}}</option>
+                              </select>
+                            </td>
+                            <td>
+                              <select class="select" size="1" v-model="item.macAddress">
+                                <option value="">--请选择--</option>
+                                <option :value="i.macAddress" v-for="i in item.allTags">{{i.macAddress}}</option>
+                              </select>
+                            </td>
+                          </tr>
+                      </tbody>
+
+                  </table>
+              </div>
+              <div class="modal-footer">
+                <button class="layui-btn" type="button" data-toggle="modal" style="float: right" @click="sendAll" @change="sendHeartAll">发送</button>
+                <button class="layui-btn" type="button" data-toggle="modal" style="float: right" data-dismiss="modal">取消</button>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+<!--该页面的所有请求统一在ImageController里面处理-->
+<script type="text/javascript">
+  new Vue({
+    el: "#myVue",
+    data: {
+      images: [],
+      goods: {
+        goodsName: "",
+        goodsSpecs: ""
+      },
+      /*模态框获取门店的列表*/
+      stores: [],
+      /*根据门店查询所有wifis时提交的对象*/
+      storeWifis: {},
+      /*获取到的所有wifi*/
+      allWifis: [],
+      /*根据wifiip查询其管理的所有价签时提交的对象*/
+      wifiTags: {},
+      /*获取到的所有价签*/
+      allTags: [],
+      /*发送时提交的对象*/
+      wifi: {
+        imageName: "",
+        wifiIp: "",
+        macAddress: ""
+      },
+      /*后端返回的消息*/
+      msg: "",
+      hasChoosedData: [], // 选中的数据
+      sendAllWifi:[]
+
+    },
+    methods: {
+      // 批量发送
+      sendAll:function() {
+        console.log(this.hasChoosedData)
+        len = this.hasChoosedData.length;
+        for (i=0;i<len;i++){
+          var sendWifi = new Object();
+          sendWifi.imageName = this.hasChoosedData[i].imageName;
+          sendWifi.wifiIp = this.hasChoosedData[i].wifiIp;
+          sendWifi.macAddress = this.hasChoosedData[i].macAddress;
+          this.sendAllWifi.push(sendWifi)
+        }
+        console.log(this.sendAllWifi);
+        var that = this;
+       $.ajax({
+         type:"POST",
+         contentType: "application/json;charset=UTF-8",
+         url:"http://localhost:8080/bluetoothprice/image/sendAll",
+         dataType:"json",
+         data: JSON.stringify(this.sendAllWifi),
+         success:function(res){
+          if(res.code==200){
+            alert("发送请求已提交，正在处理")
+            that.setTimerAll();
+          }else if(res.code == 400){
+            window.location.reload();
+            alert("发送请求提交失败！")
+          }
+         },
+         error:function(){
+           alert("ajax执行失败")
+         }
+       })
+      },
+      /*批量发送的心跳检测*/
+      sendHeartAll:function(){
+          var that = this;
+        $.ajax({
+          type:"POST",
+          contentType: "application/json;charset=UTF-8",
+          url:"http://localhost:8080/bluetoothprice/image/checkAll",
+          dataType:"json",
+          data: JSON.stringify(this.sendAllWifi),
+          success:function (res) {
+            if (res.code == 200) {
+              window.location.reload();
+              alert(res.msg)
+            } else {
+                that.setTimerAll();
+            }
+          },
+          error:function(){
+            alert("批量发送检测执行失败")
+          }
+        })
+      },
+      /*批量发送时获取所有wifi*/
+      getMateWifis:function(val){
+        this.storeWifis.storeName =val.storeName;
+        sendAxios(
+                "image/getAllWifis",
+                this.storeWifis
+        ).then(res => {
+          if (res.data.code == 200) {
+          val.allWifis = res.data.list;
+        }else {
+          alert("根据门店名获取wifi失败！")
+        }
+      }).catch(res => {
+          alert("根据门店获取wifi函数执行失败！")
+      })
+      },
+      /*批量发送时获取所有标签*/
+      getMateTags:function(val){
+       this.wifiTags.wifiIp = val.wifiIp;
+        sendAxios(
+                "image/getAllTags",
+                this.wifiTags
+        ).then(res => {
+          if (res.data.code == 200) {
+          val.allTags = res.data.list;
+} else {
+          alert("根据wifi查询价签失败！")
+        }
+      }).catch(res => {
+          alert("查询价签函数执行失败");
+      })
+      },
+      chooseAll() {
+        let isAllChoosed = 0, bool;
+        this.images.forEach((item) => {
+          if (!item.choose) {
+          isAllChoosed++
+        }
+      })
+        bool = isAllChoosed > 0 ? true : false;
+        this.images.forEach((item) => {
+          item.choose = bool
+        })
+      },
+      query: function () {
+        if (this.goods.goodsName == "") {
+          this.goods.goodsName == null
+        }
+        if (this.goods.goodsSpecs == "") {
+          this.goods.goodsSpecs == null
+        }
+        sendAxios(
+                "image/showAllImages",
+                this.goods
+        ).then(res => {
+          if (res.data.code == 200) {
+          res.data.list.forEach((item) => {
+            item.choose = false;
+        });
+          this.images = res.data.list;
+        } else {
+          alert("查询数据失败！")
+        }
+      }).catch(res => {
+          alert("函数执行失败！")
+      })
+      },
+      /*模态框点击之后获取所有门店*/
+      getAllStores: function (val) {
+        /*为了发送时候传值，在模态框显示时，将表格的属性赋值给发送时要上传的对象*/
+        this.wifi.imageName = val.imageName;
+        sendAxios(
+                "image/getAllStores",
+                {}
+        ).then(res => {
+          if (res.data.code == 200) {
+          this.stores = res.data.list;
+        } else {
+          alert("模态框获取门店失败！")
+        }
+      }).catch(res => {
+          alert("模态框获取门店列表函数执行失败！")
+      })
+      },
+      /*选择门店后获取所有wifi*/
+      getWifis: function() {
+        sendAxios(
+                "image/getAllWifis",
+                this.storeWifis
+        ).then(res => {
+          if (res.data.code == 200) {
+          this.allWifis = res.data.list;
+        } else {
+          alert("根据门店名获取wifi失败！")
+        }
+      }).catch(res => {
+          alert("根据门店获取wifi函数执行失败！")
+      })
+      },
+      /*选择wifi后获取该WiFi管理的所有价签*/
+      getTags: function (val) {
+        this.wifi.wifiIp = val.wifiIp;
+        sendAxios(
+                "image/getAllTags",
+                this.wifiTags
+        ).then(res => {
+          if (res.data.code == 200) {
+          this.allTags = res.data.list;
+        } else {
+          alert("根据wifi查询价签失败！")
+        }
+      }).catch(res => {
+          alert("查询价签函数执行失败");
+      })
+      },
+      sendImage: function () {
+        sendAxios(
+                "image/sendImage",
+                this.wifi
+        ).then(res => {
+          if (res.data.code == 200) {
+          alert("发送请求已提交，正在处理")
+          this.setTimer();
+        } else {
+          window.location.reload();
+          alert("发送请求提交失败！")
+        }
+      }).catch(res => {
+          alert("发送图片函数执行失败！")
+      })
+      },
+
+      getAllChoosedData() {
+        let choosedArr = []
+        this.images.forEach((item)=>{
+          if (item.choose) {
+            choosedArr.push(item)
+          }
+        })
+        this.hasChoosedData = choosedArr
+      },
+
+      /*批量发送时获取店名*/
+      getAllStoresInMate:function(index){
+        this.getAllChoosedData();
+        sendAxios(
+                "image/getAllStores",
+                {}
+        ).then(res => {
+          if (res.data.code == 200) {
+          this.hasChoosedData.forEach((item)=>{
+            item.stores = res.data.list;
+          })
+        } else {
+          alert("匹配图片MAC时获取门店失败！")
+        }
+      }).catch(res => {
+          alert("匹配图片MAC时获取门店列表函数执行失败！")
+      })
+      },
+
+      /*发送心跳检查是否发送成功*/
+      sendHeart: function () {
+        sendAxios(
+                "image/check",
+                this.wifi
+        ).then(res => {
+          if (res.data.code == 200) {
+          window.location.reload();
+          alert("图片已发送")
+        } else if (res.data.code == 400) {
+          window.location.reload();
+          alert("图片发送失败")
+        } else {
+          this.setTimer();
+        }
+      }).catch(res => {
+          alert("心跳函数执行失败，请联系管理员！");
+        window.location.reload();
+      })
+      },
+      deleteimg: function (theImage) {
+        this.wifi.imageName = theImage.imageName;
+      },
+      sendDeleteImage: function () {
+        if (this.wifi != null) {
+          sendAxios(
+                  "image/deleteOne",
+                  this.wifi
+          ).then(res => {
+            if (res.data.code == 200) {
+            alert("图片已删除")
+            window.location.reload();
+          } else {
+            alert("删除图片失败")
+            window.location.reload();
+          }
+        }).catch(res => {
+            alert("删除图片函数执行失败")
+          window.location.reload();
+        })
+        } else {
+          alert("没有选中删除对象")
+          window.location.reload();
+        }
+      },
+      setTimer: function () {
+        setInterval(this.sendHeart(), 2000, 2000);
+      },
+      setTimerAll:function(){
+        setInterval(this.sendHeartAll(),2000,2000);
+      },
+
+      mysure: function () {
+        $("#mydialog").modal("hide");
+        setTimeout(function () {
+          window.location.reload();
+        }, 1000);
+      }
+    },
+    created: function () {
+      this.query();
+    }
+
+  });
+</script>
+</body>
+
+</html>

@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+		<!-- Google Chrome Frame也可以让IE用上Chrome的引擎: -->
+		<meta name="renderer" content="webkit">
+		<!--国产浏览器高速模式-->
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>BlueToothPrice V1.0</title>
+
+		<!-- 公共样式 开始 -->
+		<link rel="shortcut icon" href="static/images/favicon.ico"/>
+		<link rel="bookmark" href="static/images/favicon.ico"/>
+		<link rel="stylesheet" type="text/css" href="static/css/base.css">
+		<link rel="stylesheet" type="text/css" href="static/css/iconfont.css">
+		<script type="text/javascript" src="static/framework/jquery-1.11.3.min.js" ></script>
+		<link rel="stylesheet" type="text/css" href="static/layui/css/layui.css">
+	    <!--[if lt IE 9]>
+	      	<script src="static/framework/html5shiv.min.js"></script>
+	      	<script src="static/framework/respond.min.js"></script>
+	    <![endif]-->
+		<script type="text/javascript" src="static/layui/layui.js"></script>
+		<!-- 滚动条插件 -->
+		<link rel="stylesheet" type="text/css" href="static/css/jquery.mCustomScrollbar.css">
+		<script src="static/framework/jquery-ui-1.10.4.min.js"></script>
+		<script src="static/framework/jquery.mousewheel.min.js"></script>
+		<script src="static/framework/jquery.mCustomScrollbar.min.js"></script>
+		<script src="static/framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
+		<!-- 公共样式 结束 -->
+		
+		<link rel="stylesheet" type="text/css" href="static/css/frameStyle.css">
+		<script type="text/javascript" src="static/framework/frame.js" ></script>
+		<!--js和vue引入-->
+		<script type="text/javascript" src="static/js/vue.js"></script>
+		<script type="text/javascript" src="static/js/axios.min.js"></script>
+		<script type="text/javascript" src="static/js/util.js"></script>
+	</head>
+
+	<body>
+		<div id="myVue">
+			<!-- 左侧菜单 - 开始 -->
+			<div class="frameMenu">
+				<div class="logo">
+					<div class="logoText">
+						<h1>蓝牙电子价签管理系统</h1>
+						<p>BlueToothPriceSystem</p>
+					</div>
+				</div>
+				<div class="menu">
+					<ul>
+						<li>
+							<a class="menuFA" href="javascript:void(0)"><i class="iconfont icon-liuliangyunpingtaitubiao03 left"></i>门店管理<i class="iconfont icon-dajiantouyou right"></i></a>
+							<dl>
+								<dt><a href="javascript:void(0)" onclick="menuCAClick('static/tgls/agent/agent_add.html',this)">添加门店</a></dt>
+								<dt><a href="javascript:void(0)" onclick="menuCAClick('static/tgls/agent/agent_list.html',this)">门店列表</a></dt>
+							</dl>
+						</li>
+						<li>
+							<a class="menuFA" href="javascript:void(0)"><i class="iconfont icon-shangpin left"></i>商品管理<i class="iconfont icon-dajiantouyou right"></i></a>
+							<dl>
+								<dt><a href="javascript:void(0)" onclick="menuCAClick('static/tgls/goodsManage/goods_list.html',this)">基本商品库</a></dt>
+								<dt><a href="javascript:void(0)" onclick="menuCAClick('static/tgls/goodsManage/goods_add.html',this)">添加商品</a></dt>
+							</dl>
+						</li>
+						<li>
+							<a class="menuFA" href="javascript:void(0)"><i class="iconfont icon-xianshiqi left"></i>图片管理<i class="iconfont icon-dajiantouyou right"></i></a>
+							<dl>
+								<dt><a href="javascript:void(0)" onclick="menuCAClick('static/tgls/images/images_list.html',this)">图片列表</a></dt>
+							</dl>
+						</li>
+						<li>
+							<a class="menuFA" href="javascript:void(0)"><i class="iconfont icon-ai-wallet left"></i>价签管理<i class="iconfont icon-dajiantouyou right"></i></a>
+							<dl>
+								<dt><a href="javascript:void(0)" onclick="menuCAClick('static/tgls/tagsManager/tags_list.html',this)">价签列表</a></dt>
+							</dl>
+						</li>
+						<li>
+							<a class="menuFA" href="javascript:void(0)"><i class="iconfont icon-ercifenjian left"></i>WiFi管理<i class="iconfont icon-dajiantouyou right"></i></a>
+							<dl>
+								<dt><a href="javascript:void(0)" onclick="menuCAClick('static/tgls/WIFIsManager/wifi_add.html',this)">添加WiFi</a></dt>
+								<dt><a href="javascript:void(0)" onclick="menuCAClick('static/tgls/WIFIsManager/wifi_list.html',this)">WiFi列表</a></dt>
+							</dl>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<!-- 左侧菜单 - 结束 -->
+
+			<div class="main">
+				<!-- 头部栏 - 开始 -->
+				<div class="frameTop">
+					<img class="jt" src="static/images/top_jt.png"/>
+					<div class="topMenu">
+						<ul>
+							<li><a href="javascript:void(0)"><i class="iconfont icon-yonghu1"></i>欢迎您，管理员：{{admin.name}}</a></li>
+							<li><a href="javascript:void(0)" onclick="menuCAClick('static/tgls/modify_password.html',this)"><i class="iconfont icon-xiugaimima"></i>修改密码</a></li>
+							<li><a href="login.html"><i class="iconfont icon-084tuichu"></i>注销</a></li>
+						</ul>
+					</div>
+				</div>
+				<!-- 头部栏 - 结束 -->
+
+				<!-- 核心区域 - 开始 -->
+				<div class="frameMain">
+					<div class="title" id="frameMainTitle">
+						<span><i class="iconfont icon-xianshiqi"></i>后台首页</span>
+					</div>
+					<div class="con">
+						<iframe id="mainIframe" src="static/tgls/qdAPI.html" scrolling="no"></iframe>
+					</div>
+				</div>
+				<!-- 核心区域 - 结束 -->
+			</div>
+		</div>
+		<script type="text/javascript">
+			var eu = new Vue({
+				el:"#myVue",
+				data:{
+					admin:{
+						name:""
+					}
+				},
+				created:function(){
+					this.admin.name=JSON.parse(sessionStorage.getItem("loginAdmin")).name;
+				}
+			});
+		</script>
+	</body>
+
+</html>

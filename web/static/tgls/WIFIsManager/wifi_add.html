@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+		<!-- Google Chrome Frame也可以让IE用上Chrome的引擎: -->
+		<meta name="renderer" content="webkit">
+		<!--国产浏览器高速模式-->
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- 网站简介 -->
+		<title>Bluetooth V1.0</title>
+
+		<!-- 公共样式 开始 -->
+		<link rel="stylesheet" type="text/css" href="../../css/base.css">
+		<link rel="stylesheet" type="text/css" href="../../css/iconfont.css">
+		<script type="text/javascript" src="../../framework/jquery-1.11.3.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="../../layui/css/layui.css">
+		<script type="text/javascript" src="../../layui/layui.js"></script>
+		<!-- 滚动条插件 -->
+		<link rel="stylesheet" type="text/css" href="../../css/jquery.mCustomScrollbar.css">
+		<script src="../../framework/jquery-ui-1.10.4.min.js"></script>
+		<script src="../../framework/jquery.mousewheel.min.js"></script>
+		<script src="../../framework/jquery.mCustomScrollbar.min.js"></script>
+		<script src="../../framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
+		<!-- 公共样式 结束 -->
+		<!--js和vue引入-->
+		<script type="text/javascript" src="../../js/vue.js"></script>
+		<script type="text/javascript" src="../../js/axios.min.js"></script>
+		<script type="text/javascript" src="../../js/util.js"></script>
+        <script type="text/javascript" src="../../js/popper.min.js"></script>
+		<style>
+			.layui-form{
+				margin-right: 30%;
+			}
+		</style>
+
+	</head>
+
+	<body>
+		<div id="myVue">
+			<div class="cBody">
+				<form id="addForm" class="layui-form" >
+					<div class="layui-form-item">
+						<label class="layui-form-label">选择门店</label>
+						<div class="layui-input-inline">
+                            <select name="modules" lay-verify="required"  v-model="wifis.storeId">
+                                <option value="">--请选择--</option>
+                                <option value="store.storeId" :value="store.storeId" v-for="store in allStores">{{store.storeName}}</option>
+                            </select>
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">设置IP</label>
+						<div class="layui-input-inline shortInput">
+							<input type="text" v-model="wifis.wifiIp" required lay-verify="required|identity" placeholder="例:192.168.0.122"autocomplete="off" class="layui-input">
+						</div>
+					</div>
+					<!--<div class="layui-form-item">
+						<label class="layui-form-label">是否开通</label>
+						<div class="layui-input-block">
+							<input type="radio" name="sex" value="nan" title="启用" checked>
+							<input type="radio" name="sex" value="nv" title="禁用">
+						</div>
+					</div>-->
+					<div class="layui-form-item">
+						<div class="layui-input-block">
+							<button type="button" class="layui-btn" @click="submit">立即提交</button>
+							<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+						</div>
+					</div>
+				</form>
+
+			</div>
+
+		</div>
+
+		<script type="text/javascript">
+			var eu = new Vue({
+				el:"#myVue",
+				data:{
+					wifis:{
+                        storeId:"",
+                        wifiIp:""
+                    },
+                    /*获取到的门店列表*/
+                    allStores:[]
+				},
+				methods:{
+					submit:function(){
+						sendAxios(
+							"wifis/addwifi",
+							this.wifis
+						).then(res=>{
+							if(res.data.code==200){
+								alert("添加wifi信息成功！");
+							}else{
+								alert("添加wifi信息失败！")
+							}
+							location.reload();
+						}).catch(res=>{
+							alert("函数执行失败！")
+						})
+					},
+                    getAllStores:function(){
+                        sendAxios(
+                            "wifis/getAllStores",
+                            {}
+                        ).then(res=>{
+                            if(res.data.code==200){
+                                this.allStores = res.data.list;
+                            }else{
+                                alert("获取门店列表失败")
+                            }
+                        }).catch(res=>{
+                            alert("函数执行失败！")
+                        })
+                    }
+				},
+                created:function(){
+				    this.getAllStores();
+				    /*Vue要拿到layUI下拉框的值，要使用layui的use函数，绑定v-bind:value时，将要绑定的属性先定义，再在form.on里面赋值*/
+				    this1 = this.wifis;
+                    layui.use('form', function(){
+                        var form = layui.form;
+                        form.render();
+                        form.on('select', function(data){
+                            this1.storeId=data.value; //得到被选中的值
+                        });
+                    });
+                }
+			});
+		</script>
+	</body>
+
+</html>

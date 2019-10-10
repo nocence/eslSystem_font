@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+		<!-- Google Chrome Frame也可以让IE用上Chrome的引擎: -->
+		<meta name="renderer" content="webkit">
+		<!--国产浏览器高速模式-->
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- 网站简介 -->
+		<meta name="keywords" content="搜索关键字，以半角英文逗号隔开" />
+		<title>BlueToothPrice V1.0</title>
+
+		<!-- 公共样式 开始 -->
+		<link rel="stylesheet" type="text/css" href="/static/css/base.css">
+		<link rel="stylesheet" type="text/css" href="/static/css/iconfont.css">
+		<script type="text/javascript" src="/static/framework/jquery-1.11.3.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="/static/layui/css/layui.css">
+		<script type="text/javascript" src="/static/layui/layui.js"></script>
+		<!-- 滚动条插件 -->
+		<link rel="stylesheet" type="text/css" href="/static/css/jquery.mCustomScrollbar.css">
+		<script src="/static/framework/jquery-ui-1.10.4.min.js"></script>
+		<script src="/static/framework/jquery.mousewheel.min.js"></script>
+		<script src="/static/framework/jquery.mCustomScrollbar.min.js"></script>
+		<script src="/static/framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
+		<!-- 公共样式 结束 -->
+		<!--js和vue引入-->
+		<script type="text/javascript" src="../../js/vue.js"></script>
+		<script type="text/javascript" src="../../js/axios.min.js"></script>
+		<script type="text/javascript" src="../../js/util.js"></script>
+	</head>
+
+	<body>
+		<div id="myVue">
+			<div class="cBody">
+				<div class="console">
+					<form class="layui-form" action="">
+						<div class="layui-form-item">
+							<div class="layui-input-inline">
+								<input type="text" v-model="store.storeName" required lay-verify="required" placeholder="输入门店名称" autocomplete="off" class="layui-input">
+							</div>
+							<div class="layui-input-inline">
+								<input type="text" v-model="store.storeProvince" required lay-verify="required" placeholder="输入省级名称" autocomplete="off" class="layui-input">
+							</div>
+							<div class="layui-input-inline">
+								<input type="text" v-model="store.storeUrban" required lay-verify="required" placeholder="输入市级名称" autocomplete="off" class="layui-input">
+							</div>
+
+							<button type="button" class="layui-btn" @click="query()">检索</button>
+						</div>
+					</form>
+				</div>
+
+				<table class="layui-table">
+					<thead>
+						<tr>
+							<th>序号</th>
+							<th>门店名称</th>
+							<th>所属省份</th>
+							<th>所属区域</th>
+							<th>详细地址</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr v-for="(i,index) in stores">
+							<td>{{index+1}}</td>
+							<td>{{i.storeName}}</td>
+							<td>{{i.storeProvince}}</td>
+							<td>{{i.storeUrban}}</td>
+							<td>{{i.storeAddress}}</td>
+							<td>
+								<button class="layui-btn layui-btn-xs">修改</button>
+								<button class="layui-btn layui-btn-xs">基本信息</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<script type="text/javascript">
+			new Vue({
+				el:"#myVue",
+				data:{
+					stores:[],
+					store:{
+						storeName:"",
+						storeProvince:"",
+						storeUrban:""
+					}
+				},
+				methods:{
+					query:function(){
+						if(this.store.storeName == ""){
+							this.store.storeName == null
+						}
+						if(this.store.storeProvince ==""){
+							this.store.storeProvince ==null
+						}
+						if(this.store.storeUrban ==""){
+							this.store.storeUrban == null
+						}
+						sendAxios(
+								"store/showStores",
+								this.store
+						).then(res=>{
+							if(res.data.code==200){
+								this.stores =res.data.list;
+							}else{
+								alert("查询数据失败！")
+							}
+						}).catch(res=>{
+							alert("函数执行失败！")
+						})
+					}
+				},
+				created:function(){
+					this.query();
+				}
+			});
+		</script>
+	</body>
+
+</html>

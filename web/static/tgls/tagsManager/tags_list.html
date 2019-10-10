@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+		<!-- Google Chrome Frame也可以让IE用上Chrome的引擎: -->
+		<meta name="renderer" content="webkit">
+		<!--国产浏览器高速模式-->
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<!-- 网站简介 -->
+		<meta name="keywords" content="搜索关键字，以半角英文逗号隔开" />
+		<title>BlueToothPrice V1.0</title>
+
+		<!-- 公共样式 开始 -->
+		<link rel="stylesheet" type="text/css" href="/static/css/base.css">
+		<link rel="stylesheet" type="text/css" href="/static/css/iconfont.css">
+		<script type="text/javascript" src="/static/framework/jquery-1.11.3.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="/static/layui/css/layui.css">
+		<script type="text/javascript" src="/static/layui/layui.js"></script>
+		<!-- 滚动条插件 -->
+		<link rel="stylesheet" type="text/css" href="/static/css/jquery.mCustomScrollbar.css">
+		<script src="/static/framework/jquery-ui-1.10.4.min.js"></script>
+		<script src="/static/framework/jquery.mousewheel.min.js"></script>
+		<script src="/static/framework/jquery.mCustomScrollbar.min.js"></script>
+		<script src="/static/framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
+		<!-- 公共样式 结束 -->
+		<!--js和vue引入-->
+		<script type="text/javascript" src="../../js/vue.js"></script>
+		<script type="text/javascript" src="../../js/axios.min.js"></script>
+		<script type="text/javascript" src="../../js/util.js"></script>
+		<!--bootstrap引入-->
+		<script type="text/javascript" src="../../js/jquery-1.11.3.js"></script>
+		<script type="text/javascript" src="../../js/bootstrap.js"></script>
+		<link rel="stylesheet" type="text/css" href="../../css/bootstrap.css">
+	</head>
+
+	<body>
+		<div id="myVue">
+			<div class="cBody">
+				<div class="console">
+					<form class="layui-form" action="">
+						<div class="layui-form-item">
+							<div class="layui-input-inline">
+								<input type="text" v-model="fontTag.storeName" required lay-verify="required" placeholder="输入门店名称" autocomplete="off" class="layui-input">
+							</div>
+							<div class="layui-input-inline">
+								<input type="text" v-model="fontTag.goodsName" required lay-verify="required" placeholder="输入商品名称" autocomplete="off" class="layui-input">
+							</div>
+							<button type="button" class="layui-btn" @click="query()">检索</button>
+						</div>
+					</form>
+				</div>
+
+				<table class="layui-table">
+					<thead>
+						<tr>
+							<th>序号</th>
+							<th>价签MAC地址</th>
+							<th>所属门店</th>
+							<th>所属WiFi</th>
+							<th>商品名称</th>
+							<th>商品价格</th>
+							<th>商品规格</th>
+							<th>计量单位</th>
+							<th>使用状态</th>
+							<th>操作</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr v-for="(i,index) in fontTags">
+							<td>{{index+1}}</td>
+							<td>{{i.macAddress}}</td>
+							<td>{{i.storeName}}</td>
+							<td>{{i.wifiIp}}</td>
+							<td>{{i.goodsName}}</td>
+							<td>{{i.goodsPrice}}元</td>
+							<td>{{i.goodsSpecs}}</td>
+							<td>{{i.goodsUnit}}</td>
+							<td>{{i.state}}</td>
+							<td>
+								<button class="layui-btn layui-btn-xs" type="button" data-toggle="modal" data-target="#myModal" @click="updateFontTag(i)">修改</button>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+
+			<!--模态框-->
+<!--			<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">-->
+<!--				<div class="modal-dialog">-->
+<!--					<div class="modal-content">-->
+<!--						<div class="modal-header">-->
+<!--							<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>-->
+<!--							<h4 class="modal-title" id="myModalLabel">发送图片到标签</h4>-->
+<!--						</div>-->
+<!--						<div class="modal-body">-->
+<!--							<div class="row cl">-->
+<!--								<span class="input-group-addon" id="basic-addon1">选择门店</span>-->
+<!--								<select class="select" size="1" v-model="storeWifis.storeName" @change="getWifis">-->
+<!--									<option value="">&#45;&#45;请选择&#45;&#45;</option>-->
+<!--									<option :value="i.storeName" v-for="i in stores">{{i.storeName}}</option>-->
+<!--								</select>-->
+<!--							</div>-->
+<!--                            <div class="row cl">-->
+<!--                                <span class="input-group-addon" id="basic-addon2">选择WIFI</span>-->
+<!--                                <select class="select" size="1" v-model="wifi.wifiIp" >-->
+<!--                                    <option value="">&#45;&#45;请选择&#45;&#45;</option>-->
+<!--                                    <option :value="i.wifiIp" v-for="i in allWifis">{{i.wifiIp}}</option>-->
+<!--                                </select>-->
+<!--                            </div>-->
+<!--						</div>-->
+<!--						<div class="modal-footer">-->
+<!--							<button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>-->
+<!--							<button type="button" class="btn btn-primary" @click="">确认发送</button>-->
+<!--						</div>-->
+<!--					</div>-->
+<!--				</div>-->
+<!--			</div>-->
+		</div>
+
+		<script type="text/javascript">
+			new Vue({
+				el:"#myVue",
+				data:{
+					fontTags:[],
+					fontTag:{
+						storeName:"",
+						goodsName:""
+					}
+				},
+				methods:{
+					query:function(){
+						if(this.fontTag.storeName== ""){
+							this.fontTag.storeName== null
+						}
+						if(this.fontTag.goodsName ==""){
+							this.fontTag.goodsName ==null
+						}
+						sendAxios(
+								"tags/showAllTags",
+								this.fontTag
+						).then(res=>{
+							if(res.data.code==200){
+								this.fontTags =res.data.list;
+							}else{
+								alert("查询数据失败！")
+							}
+						}).catch(res=>{
+							alert("函数执行失败！")
+						})
+					}
+				},
+				created:function(){
+					this.query();
+				}
+			});
+		</script>
+	</body>
+
+</html>
