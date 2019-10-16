@@ -21,10 +21,10 @@
                 <h3>蓝牙电子价签后台系统</h3>
                 <div class="m-login-warp">
                     <div class="layui-form-item">
-                    <input type="text" v-model="user.name"  placeholder="用户名"  class="layui-input">
+                    <input type="text" v-model="user.userName"  placeholder="用户名"  class="layui-input">
                 </div>
                 <div class="layui-form-item">
-                    <input type="password" v-model="user.passWord"  placeholder="密码"  class="layui-input">
+                    <input type="password" v-model="user.userPassWord"  placeholder="密码"  class="layui-input">
                 </div>
                 <div class="layui-form-item">
                    <b><input type="checkbox" v-model="user.remeberMe">记住密码</b>
@@ -61,7 +61,7 @@
                                 sessionStorage.setItem("loginAdmin",jsonObj);
                                 window.location.href = "frame.html";
                             }else{
-                                alert("登陆失败！")
+                                alert(res.data.msg)
                             }
                         }).catch(res=>{
                             alert("函数执行失败！")
