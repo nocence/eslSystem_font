@@ -1,4 +1,17 @@
-
+// http request拦截器 添加一个请求拦截器
+axios.interceptors.request.use(function (config) {
+    // Do something before request is sent
+    let token = window.localStorage.getItem("token")
+    if (token) {
+        config.headers.accessToken = token;    //将token放到请求头发送给服务器
+        return config;
+        //这里经常搭配token使用，将token值配置到tokenkey中，将tokenkey放在请求头中
+        // config.headers['accessToken'] = Token;
+    }
+}, function (error) {
+    // Do something with request error
+    return Promise.reject(error);
+});
 /*封装发送axios的方法*/
 var commonUrl="http://localhost:8080/eslsystem/";
 function sendAxios(myUrl,myData){
