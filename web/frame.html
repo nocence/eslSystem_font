@@ -56,7 +56,6 @@
                 <div id="index-commonmenu">
                     <ul class="layui-nav layui-nav-tree" lay-filter="demo" style="margin-right:10px;width:250px;height:1007px;"></ul>
                 </div>
-
 			</div>
 			<!-- 左侧菜单 - 结束 -->
 
@@ -144,7 +143,7 @@
                     if(obj.childMenus!=null && obj.childMenus.length>0){
                         $.each(obj.childMenus,function(i,note){
                             content+='<dd>';
-                            content+='<a href="javascript:;" onclick="menuCAClick(\'static/tgls/'+ note.perPageUrl +'\',this)">'+note.perName+'</a>';
+                            content+='<a style="font-size: smaller" href="javascript:;" onclick="menuCAClick(\'static/tgls/'+ note.perPageUrl +'\',this)">'+note.perName+'</a>';
                             if(note.childMenus==null){
                                 return;
                             }
