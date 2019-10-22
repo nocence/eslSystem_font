@@ -28,6 +28,8 @@ function sendAxios(myUrl,myData){
     var m = encrypt.encrypt(mykey);
     //向数据中添加签名
     myData.passSign = m;
+    let token = window.localStorage.getItem("token")
+    if (token !=null && token != "")this.Authorization = token;
     return new Promise((resolve, reject) => {
         //创建axios实例，把基本的配置放进去
         const instance = axios.create({
@@ -35,16 +37,10 @@ function sendAxios(myUrl,myData){
             url : commonUrl+myUrl, //请求地址
             params : myData,
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization':token
             }
-            /*处理request数据*/
-           /* transformRequest: [function (data) {
-                if (options.contentType) {
-                    return JSON.stringify(data);
-                } else {
-                    return qs.stringify(data, {arrayFormat: 'brackets'})
-                }
-            }],*/
+
         });
             //请求成功后执行的函数
         instance(commonUrl+myUrl, "POST", myData).then(res => {
