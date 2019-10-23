@@ -67,7 +67,7 @@
 						<ul>
 							<li><a href="javascript:void(0)"><i class="iconfont icon-yonghu1"></i>欢迎您，管理员：{{user.userName}}</a></li>
 							<li><a href="javascript:void(0)" onclick="menuCAClick('static/tgls/modify_password.html',this)"><i class="iconfont icon-xiugaimima"></i>修改密码</a></li>
-							<li><a href="login.html"><i class="iconfont icon-084tuichu"></i>注销</a></li>
+							<li><a href="javascript:void(0)" @click="logout()"><i class="iconfont icon-084tuichu"></i>注销</a></li>
 						</ul>
 					</div>
 				</div>
@@ -143,7 +143,7 @@
                     if(obj.childMenus!=null && obj.childMenus.length>0){
                         $.each(obj.childMenus,function(i,note){
                             content+='<dd>';
-                            content+='<a style="font-size: smaller" href="javascript:;" onclick="menuCAClick(\'static/tgls/'+ note.perPageUrl +'\',this)">'+note.perName+'</a>';
+                            content+='<a style="font-size:smaller" href="javascript:;" onclick="menuCAClick(\'static/tgls/'+ note.perPageUrl +'\',this)">'+note.perName+'</a>';
                             if(note.childMenus==null){
                                 return;
                             }
@@ -169,8 +169,22 @@
                 created:function(){
                     this.user=JSON.parse(sessionStorage.getItem("loginAdmin"));
                     console.log(this.user);
-                }
+                },
+                logout:function () {
+					sendAxios("/logout").then(res=>{
+						if(res.data.code == 200){
+							alert("注销成功");
+							window.location.href = "login.html";
+						}else {
+							alert(res.data.msg)
+						}
+					}).catch(res=>{
+						alert("函数执行失败，请联系管理员！");
+					});
+				}
             });
+
+
         </script>
 	</body>
 </html>
