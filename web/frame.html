@@ -38,7 +38,7 @@
 
 		<script type="text/javascript" src="static/js/axios.min.js"></script>
 		<script type="text/javascript" src="static/js/util.js"></script>
-
+		<script type="text/javascript" src="static/js/md5_encrypt.js"></script>
 
 	</head>
 
@@ -66,7 +66,7 @@
 					<div class="topMenu">
 						<ul>
 							<li><a href="javascript:void(0)"><i class="iconfont icon-yonghu1"></i>欢迎您，管理员：{{user.userName}}</a></li>
-							<li><a href="javascript:void(0)" onclick="menuCAClick('static/tgls/modify_password.html',this)"><i class="iconfont icon-xiugaimima"></i>修改密码</a></li>
+							<li><a id="reset_password" href="javascript:void(0)"><i class="iconfont icon-xiugaimima"></i>修改密码</a></li>
 							<li><a href="javascript:void(0)" @click="logout()"><i class="iconfont icon-084tuichu"></i>注销</a></li>
 						</ul>
 					</div>
@@ -88,6 +88,8 @@
         <script type="text/javascript">
 
             layui.use('element', function(){
+            	var form = layui.form;
+            	var layer = layui.layer;
                 var $ = layui.jquery
                     ,element = layui.element;
 
@@ -158,6 +160,64 @@
                 }
             });
 
+            layui.use(['layer','form'],function () {
+				//修改密码
+				$("#reset_password").on('click',function(){
+					layer.open({
+						type:1,
+						title:"修改密码",
+						area:["550px","210px"],
+						content:'		<form class="layui-form" style="width: 500px">\n' +
+								' 			<div class="layui-form-item">\n' +
+								' 				<label class="layui-form-label">新密码：</label>\n' +
+								' 				<div class="layui-input-block">\n' +
+								' 					<input type="password" id="new_password" placeholder="请输入新密码" autocomplete="off" class="layui-input">\n' +
+								' 				</div>\n' +
+								'           </div>\n' +
+								'	 		<div class="layui-form-item">\n' +
+								' 				<label class="layui-form-label">重复新密码:</label>\n' +
+								' 				<div class="layui-input-block">\n' +
+								' 			 		<input type="password" id="renew_password" placeholder="重复新密码" autocomplete="off" class="layui-input">\n' +
+								' 				</div>\n' +
+								' 			</div>\n'+
+								' 			<div class="layui-form-item">\n' +
+								' 				<div style="text-align:center" class="layui-input-block">\n' +
+								' 					<button id="submit" type="button" class="layui-btn">立即提交</button>\n' +
+								' 				</div>\n' +
+								' 			</div>\n' +
+								'		</form>'
+					});
+				});
+				$('body').on('click','#submit',function () {
+					var user = JSON.parse(sessionStorage.getItem("loginAdmin"));
+					var nPassword = $('#new_password').val();
+					var rePassword = $('#renew_password').val();
+					//密码加密
+					var encrypt = new JSEncrypt();
+					encrypt.setPublicKey("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCaVvWsXQoGZCfZk1snIWivx0JGE3UQCzQfT7OJ" +
+							"APDqBEKyslrM8ri4dlR9sVdcH1nzWR3XTk1reA0ATG4WUI+R1RaLp6+m6TNFxRPSibarFAZGryAQal4JEEN4q5G0KxwWvasF82G6epZTz7X" +
+							"SPIqHywFTrR3RuEb0SGDbSurqkQIDAQAB");
+					console.log(user);
+					console.log(encrypt.encrypt(nPassword));
+					if(rePassword == nPassword){
+						user.userPassWord = encrypt.encrypt(nPassword);
+						console.log(user);
+						sendAxios(
+								"user/resetPassword",
+								this.user
+						).then(res =>{
+							if (res.data.code == 200){
+								alert("密码修改成功");
+							}else {
+								alert(res.data.msg)
+							}
+						}).catch(res=>{
+							alert("函数执行失败，请联系管理员！");
+						});
+					}else {alert("两次输入密码不一致，请重新输入");}
+				})
+			})
+
             var eu = new Vue({
                 el:"#myVue",
                 data:{
@@ -165,25 +225,30 @@
                     user:{}
                 },
                 methods:{
+                    logout:function () {
+                        sendAxios("/user/logout",{}).then(res=>{
+                            if(res.data.code == 200){
+                                alert("注销成功");
+                                window.location.href = "login.html";
+                            }else {
+                                alert(res.data.msg)
+                            }
+                        }).catch(res=>{
+                            alert("函数执行失败，请联系管理员！");
+                        });
+                    }
                 },
                 created:function(){
                     this.user=JSON.parse(sessionStorage.getItem("loginAdmin"));
                     console.log(this.user);
                 },
-                logout:function () {
-					sendAxios("/logout").then(res=>{
-						if(res.data.code == 200){
-							alert("注销成功");
-							window.location.href = "login.html";
-						}else {
-							alert(res.data.msg)
-						}
-					}).catch(res=>{
-						alert("函数执行失败，请联系管理员！");
-					});
-				}
             });
 
+            //md5加密函数部分
+			function md5s(str) {
+				var MD5 = new Hashes.MD5().hex(str)
+				return MD5
+			}
 
         </script>
 	</body>
