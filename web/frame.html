@@ -79,7 +79,7 @@
 						<span><i class="iconfont icon-xianshiqi"></i>后台首页</span>
 					</div>
 					<div class="con">
-						<iframe id="mainIframe" src="http://localhost:8080/eslsystem/swagger-ui.html" scrolling="no">swagger2接口文档</iframe>
+						<iframe id="mainIframe" src="http://localhost:8080/eslsystem/swagger-ui.html" scrolling="yes">swagger2接口文档</iframe>
 					</div>
 				</div>
 				<!-- 核心区域 - 结束 -->
@@ -204,10 +204,11 @@
 						console.log(user);
 						sendAxios(
 								"user/resetPassword",
-								this.user
+								user
 						).then(res =>{
 							if (res.data.code == 200){
-								alert("密码修改成功");
+								alert(res.data.msg);
+								window.location.href="login.html";
 							}else {
 								alert(res.data.msg)
 							}
@@ -244,11 +245,6 @@
                 },
             });
 
-            //md5加密函数部分
-			function md5s(str) {
-				var MD5 = new Hashes.MD5().hex(str)
-				return MD5
-			}
 
         </script>
 	</body>
