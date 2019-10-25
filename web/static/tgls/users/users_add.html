@@ -25,6 +25,7 @@
     <script src="../../framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
     <!-- 公共样式 结束 -->
     <!--js和vue引入-->
+    <script type="text/javascript" src="../../js/jsencrypt.min.js"></script>
     <script type="text/javascript" src="../../js/vue.js"></script>
     <script type="text/javascript" src="../../js/axios.min.js"></script>
     <script type="text/javascript" src="../../js/util.js"></script>
@@ -38,35 +39,35 @@
 
 <body>
 <div id="myVue">
-    <div class="cBody">
-        <form id="addForm" class="layui-form" >
+    <div class="cBody" style="width: 500px;height: 800px">
+        <form id="addForm" class="layui-form" style="width: 500px;">
             <div class="layui-form-item">
                 <label class="layui-form-label">用户名</label>
-                <div class="layui-input-inline shortInput">
-                    <input type="text" v-model="user.userName" required lay-verify="required|identity" autocomplete="name" class="layui-input">
+                <div class="layui-input-inline Input" style="width: 350px;">
+                    <input type="text" v-model="user.userName" required lay-verify="required|identity" placeholder="用户名" autocomplete="name" class="layui-input">
                 </div>
             </div>
 
             <div class="layui-form-item">
                 <label class="layui-form-label">密码</label>
-                <div class="layui-input-inline shortInput">
-                    <input type="text" v-model="user.userPassword" required lay-verify="required|identity" placeholder="password"autocomplete="off" class="layui-input">
+                <div class="layui-input-inline Input" style="width: 350px;">
+                    <input type="password" v-model="user.userPassword" required lay-verify="required|identity" placeholder="密码"  autocomplete="off" class="layui-input">
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label">权限等级</label>
-                <div class="layui-input-inline shortInput">
-                    <select v-model="user.userLevel" required lay-verify="required|identity">
+                <div class="layui-input-inline Input" style="width: 350px;">
+                    <select name="userLevel" id="userLevel" lay-filter="roleId" required lay-verify="required|identity">
                         <option value=""></option>
-                        <option value="1">店长</option>
-                        <option value="2">店员</option>
                     </select>
                 </div>
             </div>
             <div class="layui-form-item">
                 <label class="layui-form-label">所属门店</label>
-                <div class="layui-input-inline shortInput">
-                    <input type="text" v-model="user.userBelong" required lay-verify="required|ZHCheck" placeholder="off" autocomplete="off" class="layui-input">
+                <div class="layui-input-inline Input" style="width: 350px;">
+                    <select name="userBelong" id="userBelong" lay-filter="shopNum" required lay-verify="required|identity">
+                        <option value=""></option>
+                    </select>
                 </div>
             </div>
             <!--<div class="layui-form-item">
@@ -89,37 +90,99 @@
 
     </div>
 </div>
-<script>
-    //加载layui_form
-    layui.use('form', function(){
-        var form = layui.form;
-
-    });
-</script>
 <script type="text/javascript">
     var eu = new Vue({
         el:"#myVue",
         data:{
-            user:{}
+            //用于发送的实体类
+            user:{
+                userName:"",
+                userPassword:"",
+                roleId:"",
+                shopNum:""
+            }
         },
         methods:{
             submit:function(){
+                //密码加密
+                var encrypt = new JSEncrypt();
+                encrypt.setPublicKey("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCaVvWsXQoGZCfZk1snIWivx0JGE3UQCzQfT7OJ" +
+                    "APDqBEKyslrM8ri4dlR9sVdcH1nzWR3XTk1reA0ATG4WUI+R1RaLp6+m6TNFxRPSibarFAZGryAQal4JEEN4q5G0KxwWvasF82G6epZTz7X" +
+                    "SPIqHywFTrR3RuEb0SGDbSurqkQIDAQAB");
+                this.user.userPassword = encrypt.encrypt(this.user.userPassword);
+                console.log(this.user);
+                //发送请求
                 sendAxios(
-                    "user/addinfo",
+                    "admin/addUserInfo",
                     this.user
                 ).then(res=>{
                     if(res.data.code==200){
-                        alert("添加用户信息成功！");
+                        alert(res.data.msg);
                     }else{
-                        alert("添加用户信息失败！")
+                        alert(res.data.msg);
                     }
                     location.reload();
                 }).catch(res=>{
                     alert("函数执行失败！")
                 })
             }
-        }
+        },
     });
+
+    //加载layui_form
+    layui.use('form', function(){
+        var form = layui.form;
+        //检测下拉选择事件
+        //通过lay-filter进行检测，并且获取value
+        form.on('select(roleId)',function(data) {
+            console.log(data);
+            eu.user.roleId = data.value;
+        });
+        form.on('select(shopNum)',function(data) {
+            eu.user.shopNum = data.value;
+        });
+    });
+
+    //随着页面加载启动，生成下拉选择框
+    layui.use(['form','upload','layer'],function () {
+        var form = layui.form;
+        var user = JSON.parse(sessionStorage.getItem("loginAdmin"));
+        sendAxios(
+            "admin/getRole",
+            user
+        ).then(res=>{
+            if(res.data.code==200){
+                //判断用户身份动态添加选项
+                $("#userLevel").empty();
+                $("#userBelong").empty();
+                $("#userBelong").append(new Option(""));
+                $("#userLevel").append(new Option(""));
+                $('#userLevel').append(new Option("店员","3"));
+                console.log(res.data);
+
+                //取得响应数据中的商店列表与当前用户角色
+                var shops = res.data.shops;
+                var thisRole = res.data.thisRole;
+
+                //生成下拉栏选项
+                if(thisRole == "超级管理员"){
+                    $('#userLevel').append(new Option("店长","2"));
+                    $.each(shops, function(i,item) {
+                        $('#userBelong').append(new Option(item.shopName,item.shopNum));
+                    })
+                }else{
+                    $('#userBelong').append(new Option(shops.shopName,shops.shopNum));
+                }
+            }else{
+                alert(res.data.msg);
+            }
+            //重新渲染Select元素
+            layui.form.render("select");
+        }).catch(res=>{
+            alert("函数执行失败！")
+        })
+
+    })
 </script>
 </body>
 
