@@ -38,7 +38,6 @@
 
 		<script type="text/javascript" src="static/js/axios.min.js"></script>
 		<script type="text/javascript" src="static/js/util.js"></script>
-		<script type="text/javascript" src="static/js/md5_encrypt.js"></script>
 
 	</head>
 
@@ -201,7 +200,7 @@
 					console.log(encrypt.encrypt(nPassword));
 					if(rePassword == nPassword){
 						user.userPassWord = encrypt.encrypt(nPassword);
-						console.log(user);
+						console.log("登录用户信息："+user);
 						sendAxios(
 								"user/resetPassword",
 								user

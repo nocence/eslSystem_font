@@ -79,12 +79,12 @@
             </tbody>
         </table>
     </div>
-    <div style="position:absolute;left:38%;top:85%;" id="paging"></div>
+    <div style="text-align: center" id="paging"></div>
 </div>
 <script type="text/javascript">
     var user = JSON.parse(sessionStorage.getItem("loginAdmin"));
     var current_page = 1;
-    var limit = 15;
+    var limit = 10;
     var ur = new Vue({
         el:"#myVue",
         data:{
@@ -102,13 +102,13 @@
             query:function(){
                 user.pageNum = current_page;
                 user.pageSize = limit;
-                if(this.user.selectName){
+                if(this.user.selectName != null && this.user.selectName!= ""){
                     user.selectName = this.user.selectName;
                 }
-                if(this.user.roleName){
+                if(this.user.roleName != null && this.user.roleName != ""){
                     user.roleName = this.user.roleName;
                 }
-                if(this.user.shopName){
+                if(this.user.shopName != null && this.user.shopName != ""){
                     user.shopName = this.user.shopName;
                 }
                 sendAxios(
@@ -125,8 +125,8 @@
                     }
                 }).catch(res=>{
                     alert("函数执行失败！");
-                    user = JSON.parse(sessionStorage.getItem("loginAdmin"));
                 });
+                user = JSON.parse(sessionStorage.getItem("loginAdmin"));
             },
             reset:function () {
                 this.user.selectName = "";
