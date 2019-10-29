@@ -25,6 +25,7 @@
     <script src="/static/framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
     <!-- 公共样式 结束 -->
     <!--js和vue引入-->
+    <script type="text/javascript" src="../../js/jsencrypt.min.js"></script>
     <script type="text/javascript" src="../../js/vue.js"></script>
     <script type="text/javascript" src="../../js/axios.min.js"></script>
     <script type="text/javascript" src="../../js/util.js"></script>
@@ -33,90 +34,146 @@
 <body>
 <div id="myVue">
     <div class="cBody">
-<!--        <div class="console">-->
-<!--            <form class="layui-form" action="">-->
-<!--                <div class="layui-form-item">-->
-<!--                    <div class="layui-input-inline">-->
-<!--                        <input type="text" v-model="store.storeName" required lay-verify="required" placeholder="输入门店名称" autocomplete="off" class="layui-input">-->
-<!--                    </div>-->
-<!--                    <div class="layui-input-inline">-->
-<!--                        <input type="text" v-model="store.storeProvince" required lay-verify="required" placeholder="输入省级名称" autocomplete="off" class="layui-input">-->
-<!--                    </div>-->
-<!--                    <div class="layui-input-inline">-->
-<!--                        <input type="text" v-model="store.storeUrban" required lay-verify="required" placeholder="输入市级名称" autocomplete="off" class="layui-input">-->
-<!--                    </div>-->
+        <div class="console">
+            <form class="layui-form" action="">
+                <div class="layui-form-item">
+                    <div class="layui-input-inline">
+                        <input type="text" v-model="user.selectName" required lay-verify="required" placeholder="输入用户名称(可选)" autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-input-inline">
+                        <input type="text" v-model="user.roleName" required lay-verify="required" placeholder="输入用户角色(可选)" autocomplete="off" class="layui-input">
+                    </div>
+                    <div class="layui-input-inline">
+                        <input type="text" v-model="user.shopName" required lay-verify="required" placeholder="输入用户所属门店(可选)" autocomplete="off" class="layui-input">
+                    </div>
 
-<!--                    <button type="button" class="layui-btn" @click="query()">检索</button>-->
-<!--                </div>-->
-<!--            </form>-->
-<!--        </div>-->
+                    <button type="button" class="layui-btn" @click="query()">检索</button>
+                    <button type="button" class="layui-btn" @click="reset()">重置</button>
+                </div>
+            </form>
+        </div>
 
         <table class="layui-table">
             <thead>
             <tr>
-                <th>用户ID</th>
+                <th>序号</th>
                 <th>用户名</th>
                 <th>用户权限</th>
                 <th>用户状态</th>
                 <th>所属门店</th>
+                <th>操作</th>
             </tr>
             </thead>
             <tbody>
-            <tr v-for="(i,index) in stores">
+            <tr v-for="(i,index) in users">
                 <td>{{index+1}}</td>
                 <td>{{i.userName}}</td>
-                <td>{{i.userLevel}}</td>
-                <td>{{i.userLocked}}</td>
-                <td>{{i.userBelong}}</td>
+                <td>{{i.roleName}}</td>
+                <td v-if = "i.userLocked">未锁定</td>
+                <td v-else>锁定</td>
+                <td>{{i.shopName}}</td>
                 <td>
                     <button class="layui-btn layui-btn-xs">修改</button>
-                    <button class="layui-btn layui-btn-xs">基本信息</button>
                 </td>
             </tr>
             </tbody>
         </table>
     </div>
+    <div style="position:absolute;left:38%;top:85%;" id="paging"></div>
 </div>
 <script type="text/javascript">
-    new Vue({
+    var user = JSON.parse(sessionStorage.getItem("loginAdmin"));
+    var current_page = 1;
+    var limit = 15;
+    var ur = new Vue({
         el:"#myVue",
         data:{
             users:[],
             user:{
+                userId:"",
                 userName:"",
-                userLevel:"",
+                roleName:"",
                 userLocked:"",
-                userBelong:""
+                shopName:"",
+                selectName:"",
             }
         },
         methods:{
             query:function(){
-                this.user.userName = JSON.parse(sessionStorage.getItem("loginAdmin")).name;
-                this.user.userLevel = null;
-                this.user.userLocked = null;
-                if(JSON.parse(sessionStorage.getItem("loginAdmin")).userBelong == ""){
-                    this.user.userBelong = null;
-                }else{
-                    this.user.userBelong = JSON.parse(sessionStorage.getItem("loginAdmin")).userBelong;
+                user.pageNum = current_page;
+                user.pageSize = limit;
+                if(this.user.selectName){
+                    user.selectName = this.user.selectName;
+                }
+                if(this.user.roleName){
+                    user.roleName = this.user.roleName;
+                }
+                if(this.user.shopName){
+                    user.shopName = this.user.shopName;
                 }
                 sendAxios(
-                    "user/showUser",
-                    this.user
+                    "admin/getUserList",
+                    user
                 ).then(res=>{
                     if(res.data.code==200){
-                        this.stores =res.data.list;
+                        console.log(res.data);
+                        this.users = res.data.pageInfo.list;
+                        console.log(res.data.pageInfo.total);
+                        page(res.data.pageInfo.total,current_page,limit);
                     }else{
-                        alert("查询数据失败！")
+                        alert(res.data.msg);
                     }
                 }).catch(res=>{
-                    alert("函数执行失败！")
-                })
+                    alert("函数执行失败！");
+                    user = JSON.parse(sessionStorage.getItem("loginAdmin"));
+                });
+            },
+            reset:function () {
+                this.user.selectName = "";
+                this.user.roleName = "";
+                this.user.shopName = "";
+                this.query();
             }
         },
         created:function(){
             this.query();
         }
     });
+
+    function page(count,curr,limit) {
+        layui.use('laypage',function () {
+            var laypage = layui.laypage;
+            laypage.render({
+                elem:'paging',
+                count:count,
+                limit:limit,
+                curr:curr,
+                theme:'#4e66f1',
+                jump:function (obj,first) {
+                    if(!first){
+                        curr = obj.curr;
+                        user.pageNum = curr;
+                        user.pageSize = limit;
+                        console.log(user);
+                        sendAxios(
+                            "admin/getUserList",
+                            user
+                        ).then(res=>{
+                            if(res.data.code==200){
+                                console.log(res.data);
+                                ur.users = res.data.pageInfo.list;
+                            }else{
+                                alert(res.data.msg);
+                            }
+                        }).catch(res=>{
+                            alert("函数执行失败！")
+                        })
+
+                    }
+                }
+            });
+        });
+    }
 </script>
 </body>
 
