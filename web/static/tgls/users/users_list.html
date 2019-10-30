@@ -12,17 +12,17 @@
     <title>BlueToothPrice V1.0</title>
 
     <!-- 公共样式 开始 -->
-    <link rel="stylesheet" type="text/css" href="/static/css/base.css">
-    <link rel="stylesheet" type="text/css" href="/static/css/iconfont.css">
-    <script type="text/javascript" src="/static/framework/jquery-1.11.3.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="/static/layui/css/layui.css">
-    <script type="text/javascript" src="/static/layui/layui.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../css/base.css">
+    <link rel="stylesheet" type="text/css" href="../../css/iconfont.css">
+    <script type="text/javascript" src="../../framework/jquery-1.11.3.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../layui/css/layui.css">
+    <script type="text/javascript" src="../../layui/layui.js"></script>
     <!-- 滚动条插件 -->
-    <link rel="stylesheet" type="text/css" href="/static/css/jquery.mCustomScrollbar.css">
-    <script src="/static/framework/jquery-ui-1.10.4.min.js"></script>
-    <script src="/static/framework/jquery.mousewheel.min.js"></script>
-    <script src="/static/framework/jquery.mCustomScrollbar.min.js"></script>
-    <script src="/static/framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
+    <link rel="stylesheet" type="text/css" href="../../css/jquery.mCustomScrollbar.css">
+    <script src="../../framework/jquery-ui-1.10.4.min.js"></script>
+    <script src="../../framework/jquery.mousewheel.min.js"></script>
+    <script src="../../framework/jquery.mCustomScrollbar.min.js"></script>
+    <script src="../../framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
     <!-- 公共样式 结束 -->
     <!--js和vue引入-->
     <script type="text/javascript" src="../../js/jsencrypt.min.js"></script>
@@ -73,7 +73,8 @@
                 <td v-else>锁定</td>
                 <td>{{i.shopName}}</td>
                 <td>
-                    <button class="layui-btn layui-btn-xs">修改</button>
+                    <button class="layui-btn layui-btn-xs" type="button" @click="updateUser(i)">修改</button>
+                    <button class="layui-btn layui-btn-xs" type="button" @click="deleteUser(i)">删除</button>
                 </td>
             </tr>
             </tbody>
@@ -82,9 +83,13 @@
     <div style="text-align: center" id="paging"></div>
 </div>
 <script type="text/javascript">
+    //获取登录用户角色
     var user = JSON.parse(sessionStorage.getItem("loginAdmin"));
+    //默认页数
     var current_page = 1;
+    //默认每页容量
     var limit = 10;
+
     var ur = new Vue({
         el:"#myVue",
         data:{
@@ -92,16 +97,19 @@
             user:{
                 userId:"",
                 userName:"",
+                userPassWord:"",
                 roleName:"",
                 userLocked:"",
                 shopName:"",
                 selectName:"",
-            }
+            },
+            thisRole:""
         },
         methods:{
             query:function(){
                 user.pageNum = current_page;
                 user.pageSize = limit;
+                //模糊查询赋值判定
                 if(this.user.selectName != null && this.user.selectName!= ""){
                     user.selectName = this.user.selectName;
                 }
@@ -111,14 +119,17 @@
                 if(this.user.shopName != null && this.user.shopName != ""){
                     user.shopName = this.user.shopName;
                 }
+
                 sendAxios(
                     "admin/getUserList",
                     user
                 ).then(res=>{
                     if(res.data.code==200){
                         console.log(res.data);
+                        //将返回数据绑定到页面元素
                         this.users = res.data.pageInfo.list;
                         console.log(res.data.pageInfo.total);
+                        //调用分页函数
                         page(res.data.pageInfo.total,current_page,limit);
                     }else{
                         alert(res.data.msg);
@@ -126,20 +137,68 @@
                 }).catch(res=>{
                     alert("函数执行失败！");
                 });
+                //查询完后重置user实体
                 user = JSON.parse(sessionStorage.getItem("loginAdmin"));
             },
+            //重置查询函数
             reset:function () {
                 this.user.selectName = "";
                 this.user.roleName = "";
                 this.user.shopName = "";
                 this.query();
+            },
+            //获取登录用户角色
+            getRole:function () {
+                sendAxios(
+                    "admin/getRole",
+                    user
+                ).then(res=>{
+                    if(res.data.code = 200){
+                        this.thisRole = res.data.thisRole;
+                    }else {
+                        alert(res.data.msg);
+                    }
+                }).catch(res=>{
+                    alert("函数执行失败！")
+                })
+            },
+            //删除用户
+            deleteUser:function (new_user) {
+                if(this.thisRole == "店长" && new_user.roleId == 3){
+                    this.user = new_user;
+                    this.user.selectName = new_user.userName;
+                    this.user.userName = user.userName;
+                    delete_lay(this.user);
+                }else if(this.thisRole == "超级管理员"){
+                    this.user = new_user;
+                    this.user.selectName = new_user.userName;
+                    this.user.userName = user.userName;
+                    delete_lay(this.user);
+                }else{
+                    alert("无操作权限");
+                }
+                this.reset();
+            },
+            //修改用户信息
+            updateUser:function (new_user) {
+                if(this.thisRole == "店长" && new_user.roleId == 3){
+                    update_lay(new_user);
+                }else if(this.thisRole == "超级管理员"){
+                    update_lay(new_user);
+                }else{
+                    alert("无操作权限");
+                }
+                this.reset();
             }
         },
         created:function(){
             this.query();
+            this.getRole();
         }
     });
 
+    //分页函数
+    //参数：查询总条数，当前页数，每页上限
     function page(count,curr,limit) {
         layui.use('laypage',function () {
             var laypage = layui.laypage;
@@ -150,6 +209,7 @@
                 curr:curr,
                 theme:'#4e66f1',
                 jump:function (obj,first) {
+                    //第一次不执行防止死循环
                     if(!first){
                         curr = obj.curr;
                         user.pageNum = curr;
@@ -174,6 +234,166 @@
             });
         });
     }
+    //删除用户信息弹出层函数
+    function delete_lay(new_user) {
+        layui.use(['layer'],function () {
+            layer.open({
+                type:1,
+                title:"请确认",
+                area:["280px","210px"],
+                content:'		<div align="center">\n' +
+                    '               <h2 style="padding-top:30px;padding-bottom:30px;">是否确认删除该用户</h2>\n' +
+                    ' 			    <button class="layui-btn layui-btn-sm" type="button" id="btn_yes">确认</button>\n' +
+                    ' 			    <button class="layui-btn layui-btn-sm" type="button" id="btn_no">取消</button>\n' +
+                    '           </div>'
+
+            });
+        });
+        $('body').on('click','#btn_yes',function () {
+            sendAxios(
+                'admin/deleteOne',
+                new_user
+            ).then(res=>{
+                if(res.data.code == 200){
+                    alert(res.data.msg);
+                }else {alert(res.data.msg);}
+            }).catch(res=>{
+                alert("函数执行失败！")
+            });
+        });
+        $('body').on('click','#btn_no',function () {
+            layer.close(layer.index);
+        });
+
+    }
+    //修改用户信息弹出层函数
+    function update_lay(new_user){
+        layui.use(['layer','form'],function () {
+           layer.open({
+               type:1,
+               title:"修改信息",
+               area:["500px","500px"],
+               content:'        <form class="layui-form" style="padding-top:30px;width: 500px;">\n' +
+                   '            <div class="layui-form-item">\n' +
+                   '                <label class="layui-form-label">用户名</label>\n' +
+                   '                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+                   '                    <input name="userName" id="userName" type="text" readonly="readonly" placeholder="用户名" autocomplete="name" class="layui-input">\n' +
+                   '                </div>\n' +
+                   '            </div>\n' +
+                   '            <div class="layui-form-item">\n' +
+                   '                <label class="layui-form-label">密码</label>\n' +
+                   '                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+                   '                    <input name="userPassword" id="userPassword" type="password" placeholder="密码"  autocomplete="off" class="layui-input">\n' +
+                   '                </div>\n' +
+                   '            </div>\n' +
+                   '            <div class="layui-form-item">\n' +
+                   '                <label class="layui-form-label">是否锁定</label>\n' +
+                   '                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+                   '                    <input type="radio" name="userLocked" value="1" title="是">\n' +
+                   '                    <input type="radio" name="userLocked" value="0" title="否" checked>\n' +
+                   '                </div>\n' +
+                   '            </div>\n' +
+                   '            <div class="layui-form-item">\n' +
+                   '                <label class="layui-form-label">所属门店</label>\n' +
+                   '                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+                   '                    <select name="userBelong" id="userBelong" lay-filter="shopNum">\n' +
+                   '                        <option value=""></option>\n' +
+                   '                    </select>\n' +
+                   '                </div>\n' +
+                   '            </div>\n' +
+                   '            <div class="layui-form-item">\n' +
+                   '                <label class="layui-form-label">权限等级</label>\n' +
+                   '                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+                   '                    <select name="userLevel" id="userLevel" lay-filter="roleId">\n' +
+                   '                        <option value=""></option>\n' +
+                   '                    </select>\n' +
+                   '                </div>\n' +
+                   '            </div>\n' +
+                   '            <div class="layui-form-item">\n' +
+                   '                <div class="layui-input-block">\n' +
+                   '                    <p>*不做更改项请留空</p>\n' +
+                   '                    <button lay-submit lay-filter="btn_yes" class="layui-btn layui-btn-sm" type="button" id="btn_yes">立即提交</button>\n' +
+                   '                    <button class="layui-btn layui-btn-sm" type="button" id="btn_no">取消</button>\n' +
+                   '                </div>\n' +
+                   '            </div>\n' +
+                   '        </form>'
+           });
+            console.log(new_user);
+            $('body').on('click','#btn_no',function () {
+                layer.close(layer.index);
+            });
+            document.getElementById("userName").value=new_user.userName;
+            //加载表单
+            layui.use('form', function(){
+                var form = layui.form;
+
+                //获取下拉菜单
+                sendAxios(
+                    "admin/getRole",
+                    user
+                ).then(res=>{
+                    if(res.data.code==200){
+                        //判断用户身份动态添加选项
+                        $('#userLevel').empty();
+                        $('#userBelong').empty();
+                        $('#userBelong').append(new Option(""));
+                        $('#userLevel').append(new Option(""));
+                        $('#userLevel').append(new Option("店员","3"));
+                        $('#userLevel').append(new Option("店长","2"));
+                        var shops = res.data.shops;
+                        $.each(shops, function(i,item) {
+                            $('#userBelong').append(new Option(item.shopName,item.shopNum));
+                        })
+
+                    }else{
+                        alert(res.data.msg);
+                    }
+                    //重新渲染Select元素
+                    layui.form.render("select");
+                }).catch(res=>{
+                    alert("函数执行失败！")
+                });
+                layui.form.render();
+
+                //检测下拉选择事件
+                //通过lay-filter进行检测，并且获取value
+                form.on('select(roleId)',function(data) {
+                    console.log(data);
+                    new_user.roleId = data.value;
+                });
+                form.on('select(shopNum)',function(data) {
+                    new_user.shopNum = data.value;
+                });
+                form.on('submit(btn_yes)', function (data) {
+                    new_user.selectName = data.userName;
+                    new_user.userName = user.userName;
+                    new_user.userLocked = data.userLocked;
+                    var encrypt = new JSEncrypt();
+                    encrypt.setPublicKey("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCaVvWsXQoGZCfZk1snIWivx0JGE3UQCzQfT7OJ" +
+                        "APDqBEKyslrM8ri4dlR9sVdcH1nzWR3XTk1reA0ATG4WUI+R1RaLp6+m6TNFxRPSibarFAZGryAQal4JEEN4q5G0KxwWvasF82G6epZTz7X" +
+                        "SPIqHywFTrR3RuEb0SGDbSurqkQIDAQAB");
+                    new_user.userPassWord = encrypt.encrypt(data.userPassWord);
+                    sendAxios(
+                        'admin/updateOne',
+                        new_user
+                    ).then(res=>{
+                        if(res.data.code == 200){
+                            alert(res.data.msg);
+                        }else {alert(res.data.msg);}
+                    }).catch(res=>{
+                        alert("函数执行失败！")
+                    });
+                });
+            });
+        });
+
+
+
+
+    }
+
+
+
 </script>
 </body>
 
