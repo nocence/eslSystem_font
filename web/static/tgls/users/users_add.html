@@ -110,7 +110,6 @@
                     "APDqBEKyslrM8ri4dlR9sVdcH1nzWR3XTk1reA0ATG4WUI+R1RaLp6+m6TNFxRPSibarFAZGryAQal4JEEN4q5G0KxwWvasF82G6epZTz7X" +
                     "SPIqHywFTrR3RuEb0SGDbSurqkQIDAQAB");
                 this.user.userPassword = encrypt.encrypt(this.user.userPassword);
-                console.log(this.user);
                 //发送请求
                 sendAxios(
                     "admin/addUserInfo",
@@ -135,7 +134,6 @@
         //检测下拉选择事件
         //通过lay-filter进行检测，并且获取value
         form.on('select(roleId)',function(data) {
-            console.log(data);
             eu.user.roleId = data.value;
         });
         form.on('select(shopNum)',function(data) {
@@ -158,7 +156,6 @@
                 $("#userBelong").append(new Option(""));
                 $("#userLevel").append(new Option(""));
                 $('#userLevel').append(new Option("店员","3"));
-                console.log(res.data);
 
                 //取得响应数据中的商店列表与当前用户角色
                 var shops = res.data.shops;

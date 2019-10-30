@@ -125,10 +125,8 @@
                     user
                 ).then(res=>{
                     if(res.data.code==200){
-                        console.log(res.data);
                         //将返回数据绑定到页面元素
                         this.users = res.data.pageInfo.list;
-                        console.log(res.data.pageInfo.total);
                         //调用分页函数
                         page(res.data.pageInfo.total,current_page,limit);
                     }else{
@@ -214,13 +212,11 @@
                         curr = obj.curr;
                         user.pageNum = curr;
                         user.pageSize = limit;
-                        console.log(user);
                         sendAxios(
                             "admin/getUserList",
                             user
                         ).then(res=>{
                             if(res.data.code==200){
-                                console.log(res.data);
                                 ur.users = res.data.pageInfo.list;
                             }else{
                                 alert(res.data.msg);
@@ -256,7 +252,11 @@
             ).then(res=>{
                 if(res.data.code == 200){
                     alert(res.data.msg);
-                }else {alert(res.data.msg);}
+                    location.reload();
+                }else {
+                    alert(res.data.msg);
+                    location.reload();
+                }
             }).catch(res=>{
                 alert("函数执行失败！")
             });
@@ -318,7 +318,6 @@
                    '            </div>\n' +
                    '        </form>'
            });
-            console.log(new_user);
             $('body').on('click','#btn_no',function () {
                 layer.close(layer.index);
             });
@@ -358,7 +357,6 @@
                 //检测下拉选择事件
                 //通过lay-filter进行检测，并且获取value
                 form.on('select(roleId)',function(data) {
-                    console.log(data);
                     new_user.roleId = data.value;
                 });
                 form.on('select(shopNum)',function(data) {

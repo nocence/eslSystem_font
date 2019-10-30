@@ -15,7 +15,6 @@ axios.interceptors.request.use(function (config) {
 /*封装发送axios的方法*/
 var commonUrl="http://localhost:8080/eslsystem/";
 function sendAxios(myUrl,myData){
-    console.log(myData);
     //创建加解密对象
     var encrypt = new JSEncrypt();
     //设置公钥
