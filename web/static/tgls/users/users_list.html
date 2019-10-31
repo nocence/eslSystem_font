@@ -99,9 +99,11 @@
                 userName:"",
                 userPassWord:"",
                 roleName:"",
+                roleId:"",
                 userLocked:"",
                 shopName:"",
                 selectName:"",
+                shopNum:""
             },
             thisRole:""
         },
@@ -162,16 +164,11 @@
             },
             //删除用户
             deleteUser:function (new_user) {
+                console.log(this.thisRole);
                 if(this.thisRole == "店长" && new_user.roleId == 3){
-                    this.user = new_user;
-                    this.user.selectName = new_user.userName;
-                    this.user.userName = user.userName;
-                    delete_lay(this.user);
+                    delete_lay(new_user);
                 }else if(this.thisRole == "超级管理员"){
-                    this.user = new_user;
-                    this.user.selectName = new_user.userName;
-                    this.user.userName = user.userName;
-                    delete_lay(this.user);
+                    delete_lay(new_user);
                 }else{
                     alert("无操作权限");
                 }
@@ -246,6 +243,10 @@
             });
         });
         $('body').on('click','#btn_yes',function () {
+            console.log("要修改的userName："+new_user.userName);
+            new_user.selectName = new_user.userName;
+            console.log("当前的selectName："+new_user.selectName);
+            new_user.userName = user.userName;
             sendAxios(
                 'admin/deleteOne',
                 new_user
@@ -363,14 +364,15 @@
                     new_user.shopNum = data.value;
                 });
                 form.on('submit(btn_yes)', function (data) {
-                    new_user.selectName = data.userName;
+                    console.log(data.field.userName);
+                    new_user.selectName = data.field.userName;
                     new_user.userName = user.userName;
-                    new_user.userLocked = data.userLocked;
+                    new_user.userLocked = data.field.userLocked;
                     var encrypt = new JSEncrypt();
                     encrypt.setPublicKey("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCaVvWsXQoGZCfZk1snIWivx0JGE3UQCzQfT7OJ" +
                         "APDqBEKyslrM8ri4dlR9sVdcH1nzWR3XTk1reA0ATG4WUI+R1RaLp6+m6TNFxRPSibarFAZGryAQal4JEEN4q5G0KxwWvasF82G6epZTz7X" +
                         "SPIqHywFTrR3RuEb0SGDbSurqkQIDAQAB");
-                    new_user.userPassWord = encrypt.encrypt(data.userPassWord);
+                    new_user.userPassword = encrypt.encrypt(data.field.userPassword);
                     sendAxios(
                         'admin/updateOne',
                         new_user
