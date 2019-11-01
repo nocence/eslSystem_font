@@ -69,8 +69,8 @@
                 <td>{{index+1}}</td>
                 <td>{{i.userName}}</td>
                 <td>{{i.roleName}}</td>
-                <td v-if = "i.userLocked">未锁定</td>
-                <td v-else>锁定</td>
+                <td v-if = "i.userLocked === '0'">未锁定</td>
+                <td v-if = "i.userLocked === '1'">锁定</td>
                 <td>{{i.shopName}}</td>
                 <td>
                     <button class="layui-btn layui-btn-xs" type="button" @click="updateUser(i)">修改</button>
@@ -243,10 +243,11 @@
             });
         });
         $('body').on('click','#btn_yes',function () {
+            var temp_user = new_user;
             console.log("要修改的userName："+new_user.userName);
-            new_user.selectName = new_user.userName;
+            temp_user.selectName = new_user.userName;
             console.log("当前的selectName："+new_user.selectName);
-            new_user.userName = user.userName;
+            temp_user.userName = user.userName;
             sendAxios(
                 'admin/deleteOne',
                 new_user
@@ -269,6 +270,9 @@
     }
     //修改用户信息弹出层函数
     function update_lay(new_user){
+        new_user.roleId = null;
+        new_user.shopNum = null;
+        new_user.userLocked = "";
         layui.use(['layer','form'],function () {
            layer.open({
                type:1,
@@ -291,7 +295,7 @@
                    '                <label class="layui-form-label">是否锁定</label>\n' +
                    '                <div class="layui-input-inline Input" style="width: 350px;">\n' +
                    '                    <input type="radio" name="userLocked" value="1" title="是">\n' +
-                   '                    <input type="radio" name="userLocked" value="0" title="否" checked>\n' +
+                   '                    <input type="radio" name="userLocked" value="0" title="否">\n' +
                    '                </div>\n' +
                    '            </div>\n' +
                    '            <div class="layui-form-item">\n' +
@@ -372,28 +376,36 @@
                     encrypt.setPublicKey("MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCaVvWsXQoGZCfZk1snIWivx0JGE3UQCzQfT7OJ" +
                         "APDqBEKyslrM8ri4dlR9sVdcH1nzWR3XTk1reA0ATG4WUI+R1RaLp6+m6TNFxRPSibarFAZGryAQal4JEEN4q5G0KxwWvasF82G6epZTz7X" +
                         "SPIqHywFTrR3RuEb0SGDbSurqkQIDAQAB");
-                    new_user.userPassword = encrypt.encrypt(data.field.userPassword);
+                    new_user.userPassWord = encrypt.encrypt(data.field.userPassword);
+                    console.log(new_user);
                     sendAxios(
                         'admin/updateOne',
                         new_user
                     ).then(res=>{
-                        if(res.data.code == 200){
-                            alert(res.data.msg);
-                        }else {alert(res.data.msg);}
-                    }).catch(res=>{
-                        alert("函数执行失败！")
-                    });
+                        console.log(res);
+                        var layoutStr = "";
+                        //判定是否有返回信息
+                        if(res.data.res){
+                            var updateRes = res.data.res;
+                            if(updateRes.password)
+                                layoutStr += updateRes.password.msg;
+                            if(updateRes.userRole)
+                                layoutStr += "\n" + updateRes.userRole.msg;
+                            if(updateRes.userShop)
+                                layoutStr += "\n" + updateRes.userShop.msg;
+                            if(updateRes.userLocked)
+                                layoutStr += "\n" + updateRes.userLocked.msg;
+                            location.reload();
+                        }
+                        if (layoutStr == "")
+                            alert("请输入修改数据");
+                        else alert(layoutStr);
+                    }).catch();
+
                 });
             });
         });
-
-
-
-
     }
-
-
-
 </script>
 </body>
 
