@@ -1,124 +1,307 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="UTF-8">
-		<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
-		<!-- Google Chrome Frame也可以让IE用上Chrome的引擎: -->
-		<meta name="renderer" content="webkit">
-		<!--国产浏览器高速模式-->
-		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<!-- 网站简介 -->
-		<meta name="keywords" content="搜索关键字，以半角英文逗号隔开" />
-		<title>BlueToothPrice V1.0</title>
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+	<!-- Google Chrome Frame也可以让IE用上Chrome的引擎: -->
+	<meta name="renderer" content="webkit">
+	<!--国产浏览器高速模式-->
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<!-- 网站简介 -->
+	<meta name="keywords" content="搜索关键字，以半角英文逗号隔开" />
+	<title>BlueToothPrice V1.0</title>
 
-		<!-- 公共样式 开始 -->
-		<link rel="stylesheet" type="text/css" href="/static/css/base.css">
-		<link rel="stylesheet" type="text/css" href="/static/css/iconfont.css">
-		<script type="text/javascript" src="/static/framework/jquery-1.11.3.min.js"></script>
-		<link rel="stylesheet" type="text/css" href="/static/layui/css/layui.css">
-		<script type="text/javascript" src="/static/layui/layui.js"></script>
-		<!-- 滚动条插件 -->
-		<link rel="stylesheet" type="text/css" href="/static/css/jquery.mCustomScrollbar.css">
-		<script src="/static/framework/jquery-ui-1.10.4.min.js"></script>
-		<script src="/static/framework/jquery.mousewheel.min.js"></script>
-		<script src="/static/framework/jquery.mCustomScrollbar.min.js"></script>
-		<script src="/static/framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
-		<!-- 公共样式 结束 -->
-		<!--js和vue引入-->
-		<script type="text/javascript" src="../../js/vue.js"></script>
-		<script type="text/javascript" src="../../js/axios.min.js"></script>
-		<script type="text/javascript" src="../../js/util.js"></script>
-	</head>
+	<!-- 公共样式 开始 -->
+	<link rel="stylesheet" type="text/css" href="../../css/base.css">
+	<link rel="stylesheet" type="text/css" href="../../css/iconfont.css">
+	<script type="text/javascript" src="../../framework/jquery-1.11.3.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="../../layui/css/layui.css">
+	<script type="text/javascript" src="../../layui/layui.js"></script>
+	<!-- 滚动条插件 -->
+	<link rel="stylesheet" type="text/css" href="../../css/jquery.mCustomScrollbar.css">
+	<script src="../../framework/jquery-ui-1.10.4.min.js"></script>
+	<script src="../../framework/jquery.mousewheel.min.js"></script>
+	<script src="../../framework/jquery.mCustomScrollbar.min.js"></script>
+	<script src="../../framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
+	<!-- 公共样式 结束 -->
+	<!--js和vue引入-->
+	<script type="text/javascript" src="../../js/jsencrypt.min.js"></script>
+	<script type="text/javascript" src="../../js/vue.js"></script>
+	<script type="text/javascript" src="../../js/axios.min.js"></script>
+	<script type="text/javascript" src="../../js/util.js"></script>
+</head>
 
-	<body>
-		<div id="myVue">
-			<div class="cBody">
-				<div class="console">
-					<form class="layui-form" action="">
-						<div class="layui-form-item">
-							<div class="layui-input-inline">
-								<input type="text" v-model="store.storeName" required lay-verify="required" placeholder="输入门店名称" autocomplete="off" class="layui-input">
-							</div>
-							<div class="layui-input-inline">
-								<input type="text" v-model="store.storeProvince" required lay-verify="required" placeholder="输入省级名称" autocomplete="off" class="layui-input">
-							</div>
-							<div class="layui-input-inline">
-								<input type="text" v-model="store.storeUrban" required lay-verify="required" placeholder="输入市级名称" autocomplete="off" class="layui-input">
-							</div>
-
-							<button type="button" class="layui-btn" @click="query()">检索</button>
-						</div>
-					</form>
+<body>
+<div id="myVue">
+	<div class="cBody">
+		<div class="console">
+			<form class="layui-form" action="">
+				<div class="layui-form-item">
+					<div class="layui-input-inline">
+						<input type="text" v-model="shop.shopName" required lay-verify="required" placeholder="输入门店名称" autocomplete="off" class="layui-input">
+					</div>
+					<div class="layui-input-inline">
+						<input type="text" v-model="shop.shopProvince" required lay-verify="required" placeholder="输入省级名称" autocomplete="off" class="layui-input">
+					</div>
+					<div class="layui-input-inline">
+						<input type="text" v-model="shop.shopUrban" required lay-verify="required" placeholder="输入市级名称" autocomplete="off" class="layui-input">
+					</div>
+					<button type="button" class="layui-btn" @click="query()">检索</button>
+					<button type="button" class="layui-btn" @click="reset()">重置</button>
 				</div>
-
-				<table class="layui-table">
-					<thead>
-						<tr>
-							<th>序号</th>
-							<th>门店名称</th>
-							<th>所属省份</th>
-							<th>所属区域</th>
-							<th>详细地址</th>
-							<th>操作</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr v-for="(i,index) in stores">
-							<td>{{index+1}}</td>
-							<td>{{i.storeName}}</td>
-							<td>{{i.storeProvince}}</td>
-							<td>{{i.storeUrban}}</td>
-							<td>{{i.storeAddress}}</td>
-							<td>
-								<button class="layui-btn layui-btn-xs">修改</button>
-								<button class="layui-btn layui-btn-xs">基本信息</button>
-							</td>
-						</tr>
-					</tbody>
-				</table>
-			</div>
+			</form>
 		</div>
-		<script type="text/javascript">
-			new Vue({
-				el:"#myVue",
-				data:{
-					stores:[],
-					store:{
-						storeName:"",
-						storeProvince:"",
-						storeUrban:""
+
+		<table class="layui-table">
+			<thead>
+				<tr>
+					<th>序号</th>
+					<th>门店名称</th>
+					<th>所属省份</th>
+					<th>所属区域</th>
+					<th>详细地址</th>
+					<th>操作</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr v-for="(i,index) in shops">
+					<td>{{index+1}}</td>
+					<td>{{i.shopName}}</td>
+					<td>{{i.shopProvince}}</td>
+					<td>{{i.shopUrban}}</td>
+					<td>{{i.shopAddress}}</td>
+					<td>
+						<button class="layui-btn layui-btn-xs" type="button" @click="updateShop(i)">修改</button>
+						<button class="layui-btn layui-btn-xs" type="button" @click="deleteShop(i)">删除</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div style="text-align: center" id="paging"></div>
+</div>
+<script type="text/javascript">
+	//获取登录用户角色
+	var user = JSON.parse(sessionStorage.getItem("loginAdmin"));
+	//默认页数
+	var current_page = 1;
+	//默认每页容量
+	var limit = 10;
+
+	var ur = new Vue({
+		el:"#myVue",
+		data:{
+			shops:[],
+			shop:{
+				shopNum:"",
+				shopName:"",
+				shopProvince:"",
+				shopUrban:"",
+				shopAddress:""
+			}
+		},
+		methods:{
+			query:function(){
+				user.pageNum = current_page;
+				user.pageSize = limit;
+				//模糊查询
+				if(this.shop.shopName == ""){
+					this.shop.shopName = null;
+				}else user.shopName = this.shop.shopName;
+				if(this.shop.shopProvince == ""){
+					this.shop.shopProvince =null;
+				}else user.shopProvince = this.shop.shopProvince;
+				if(this.shop.shopUrban == ""){
+					this.shop.shopUrban = null
+				}else user.shopUrban = this.shop.shopUrban;
+				sendAxios(
+						"shop/getAllShops",
+						user
+				).then(res=>{
+					if(res.data.code==200){
+						this.shops =res.data.pageInfo.list;
+						//调用分页函数
+						page(res.data.pageInfo.total,current_page,limit);
+					}else{
+						alert("查询数据失败！")
 					}
-				},
-				methods:{
-					query:function(){
-						if(this.store.storeName == ""){
-							this.store.storeName == null
-						}
-						if(this.store.storeProvince ==""){
-							this.store.storeProvince ==null
-						}
-						if(this.store.storeUrban ==""){
-							this.store.storeUrban == null
-						}
+				}).catch(res=>{
+					alert("函数执行失败！")
+				});
+				//查询完后重置user实体
+				user = JSON.parse(sessionStorage.getItem("loginAdmin"));
+			},
+			//重置查询函数
+			reset:function () {
+				this.shop.shopProvince = "";
+				this.shop.shopName = "";
+				this.shop.shopUrban = "";
+				this.query();
+			},
+			updateShop:function (new_shop) {
+				update_lay(new_shop);
+			},
+			deleteShop:function (new_shop) {
+				delete_lay(new_shop);
+			}
+		},
+		created:function(){
+			this.query();
+		}
+	});
+
+	//分页函数
+	//参数：查询总条数，当前页数，每页上限
+	function page(count,curr,limit) {
+		layui.use('laypage',function () {
+			var laypage = layui.laypage;
+			laypage.render({
+				elem:'paging',
+				count:count,
+				limit:limit,
+				curr:curr,
+				theme:'#4e66f1',
+				jump:function (obj,first) {
+					//第一次不执行防止死循环
+					if(!first){
+						curr = obj.curr;
+						user.pageNum = curr;
+						user.pageSize = limit;
 						sendAxios(
-								"store/showStores",
-								this.store
+								"shop/getAllShops",
+								user
 						).then(res=>{
 							if(res.data.code==200){
-								this.stores =res.data.list;
+								ur.shops = res.data.pageInfo.list;
 							}else{
-								alert("查询数据失败！")
+								alert(res.data.msg);
 							}
 						}).catch(res=>{
 							alert("函数执行失败！")
 						})
+
 					}
-				},
-				created:function(){
-					this.query();
 				}
 			});
-		</script>
-	</body>
+		});
+	}
 
+	//删除门店信息弹出层函数
+	function delete_lay(new_shop) {
+		layui.use(['layer'],function () {
+			layer.open({
+				type:1,
+				title:"请确认",
+				area:["280px","210px"],
+				content:'		<div align="center">\n' +
+						'               <h2 style="padding-top:30px;padding-bottom:30px;">是否确认删除该门店</h2>\n' +
+						' 			    <button class="layui-btn layui-btn-sm" type="button" id="btn_yes">确认</button>\n' +
+						' 			    <button class="layui-btn layui-btn-sm" type="button" id="btn_no">取消</button>\n' +
+						'           </div>'
+			});
+		});
+		$('body').on('click','#btn_yes',function () {
+			new_shop.userName = user.userName;
+			sendAxios(
+					'shop/deleteShopInfo',
+					new_shop
+			).then(res=>{
+				if(res.data.code == 200){
+					alert(res.data.msg);
+					location.reload();
+				}else {
+					alert(res.data.msg);
+					location.reload();
+				}
+			}).catch();
+		});
+		$('body').on('click','#btn_no',function () {
+			layer.close(layer.index);
+		});
+	}
+
+	//修改门店信息弹出层函数
+	function update_lay(new_shop){
+		new_shop.roleId = null;
+		new_shop.shopNum = null;
+		new_shop.userLocked = "";
+		layui.use(['layer','form'],function () {
+			layer.open({
+				type:1,
+				title:"修改信息",
+				area:["500px","500px"],
+				content:'        <form class="layui-form" style="padding-top:30px;width: 500px;">\n' +
+						'            <div class="layui-form-item">\n' +
+						'                <label class="layui-form-label">门店名</label>\n' +
+						'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+						'                    <input name="shopName" id="shopName" type="text" placeholder="门店名" autocomplete="name" class="layui-input">\n' +
+						'                </div>\n' +
+						'            </div>\n' +
+						'            <div class="layui-form-item">\n' +
+						'                <label class="layui-form-label">所属省份</label>\n' +
+						'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+						'                    <input name="shopProvince" id="shopProvince" type="text" placeholder="所属省份"  autocomplete="off" class="layui-input">\n' +
+						'                </div>\n' +
+						'            </div>\n' +
+						'            <div class="layui-form-item">\n' +
+						'                <label class="layui-form-label">所属区域</label>\n' +
+						'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+						'                    <input name="shopUrban" id="shopUrban" type="text" placeholder="所属区域"  autocomplete="off" class="layui-input">\n' +
+						'                </div>\n' +
+						'            </div>\n' +
+						'            <div class="layui-form-item">\n' +
+						'                <label class="layui-form-label">详细地址</label>\n' +
+						'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+						'                    <input name="shopAddress" id="shopAddress" type="text" placeholder="详细地址"  autocomplete="off" class="layui-input">\n' +
+						'                </div>\n' +
+						'            </div>\n' +
+						'            <div class="layui-form-item">\n' +
+						'                <div class="layui-input-block">\n' +
+						'                    <p>*不做更改项请留空</p>\n' +
+						'                    <button lay-submit lay-filter="btn_yes" class="layui-btn layui-btn-sm" type="button" id="btn_yes">立即提交</button>\n' +
+						'                    <button class="layui-btn layui-btn-sm" type="button" id="btn_no">取消</button>\n' +
+						'                </div>\n' +
+						'            </div>\n' +
+						'        </form>'
+			});
+			$('body').on('click','#btn_no',function () {
+				layer.close(layer.index);
+			});
+			document.getElementById("shopName").value=new_shop.shopName;
+			//加载表单
+			layui.use('form', function(){
+				var form = layui.form;
+				//渲染表单
+				layui.form.render();
+				form.on('submit(btn_yes)', function (data) {
+					new_shop.shopNum = data.field.shopNum;
+					new_shop.shopName = data.field.shopName;
+					new_shop.shopProvince = data.field.shopProvince;
+					new_shop.shopUrban = data.field.shopUrban;
+					new_shop.shopAddress = data.field.shopAddress;
+					new_shop.userName = user.userName;
+					console.log(new_shop);
+					sendAxios(
+							'shop/updateShopInfo',
+							new_shop
+					).then(res=>{
+						console.log(res);
+						var layoutStr = "";
+						//判定是否有返回信息
+						if(res.data.res){
+							//返回信息拼接
+							layoutStr += "请求发送成功";
+							location.reload();
+						}
+						//无返回信息时提示输入
+						if (layoutStr == "")
+							alert("请输入修改数据");
+						else alert(layoutStr);
+					}).catch();
+				});
+			});
+		});
+	}
+</script>
+</body>
 </html>

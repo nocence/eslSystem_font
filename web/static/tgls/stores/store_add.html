@@ -25,6 +25,7 @@
 		<script src="../../framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
 		<!-- 公共样式 结束 -->
 		<!--js和vue引入-->
+		<script type="text/javascript" src="../../js/jsencrypt.min.js"></script>
 		<script type="text/javascript" src="../../js/vue.js"></script>
 		<script type="text/javascript" src="../../js/axios.min.js"></script>
 		<script type="text/javascript" src="../../js/util.js"></script>
@@ -43,26 +44,26 @@
 					<div class="layui-form-item">
 						<label class="layui-form-label">门店名</label>
 						<div class="layui-input-inline shortInput">
-							<input type="text" v-model="store.storeName" required lay-verify="required|identity" autocomplete="off" class="layui-input">
+							<input type="text" v-model="shop.shopName" required lay-verify="required|identity" autocomplete="off" class="layui-input">
 						</div>
 					</div>
 
 					<div class="layui-form-item">
 						<label class="layui-form-label">省份</label>
 						<div class="layui-input-inline shortInput">
-							<input type="text" v-model="store.storeProvince" required lay-verify="required|identity" placeholder="例:贵州省"autocomplete="off" class="layui-input">
+							<input type="text" v-model="shop.shopProvince" required lay-verify="required|identity" placeholder="例:贵州省"autocomplete="off" class="layui-input">
 						</div>
 					</div>
 					<div class="layui-form-item">
 						<label class="layui-form-label">市区</label>
 						<div class="layui-input-inline shortInput">
-							<input type="text" v-model="store.storeUrban" required lay-verify="required|identity" placeholder="例:贵阳市"autocomplete="off" class="layui-input">
+							<input type="text" v-model="shop.shopUrban" required lay-verify="required|identity" placeholder="例:贵阳市"autocomplete="off" class="layui-input">
 						</div>
 					</div>
 					<div class="layui-form-item">
 						<label class="layui-form-label">详细地址</label>
 						<div class="layui-input-inline shortInput">
-							<input type="text" v-model="store.storeAddress" required lay-verify="required|ZHCheck" placeholder="例:九龙坡区科城路1号" autocomplete="off" class="layui-input">
+							<input type="text" v-model="shop.shopAddress" required lay-verify="required|ZHCheck" placeholder="例:九龙坡区科城路1号" autocomplete="off" class="layui-input">
 						</div>
 					</div>
 					<!--<div class="layui-form-item">
@@ -103,23 +104,32 @@
 			var eu = new Vue({
 				el:"#myVue",
 				data:{
-					store:{}
+					shop:{
+						shopName:"",
+						shopProvince:"",
+						shopUrban:"",
+						shopAddress:""
+					}
 				},
 				methods:{
 					submit:function(){
-						sendAxios(
-							"store/addinfo",
-							this.store
-						).then(res=>{
-							if(res.data.code==200){
-								alert("添加门店信息成功！");
-							}else{
-								alert("添加门店信息失败！")
-							}
-							location.reload();
-						}).catch(res=>{
-							alert("函数执行失败！")
-						})
+						if(this.shop.shopName == "" || this.shop.shopProvince == ""|| this.shop.shopUrban == "" || this.shop.shopAddress == "")
+							alert("请完整填写所有信息");
+						else{
+							sendAxios(
+									"shop/addShopInfo",
+									this.shop
+							).then(res=>{
+								if(res.data.code==200){
+									alert("添加门店信息成功！");
+								}else{
+									alert("添加门店信息失败！")
+								}
+								location.reload();
+							}).catch(res=>{
+								alert("函数执行失败！")
+							})
+						}
 					}
 				}
 			});

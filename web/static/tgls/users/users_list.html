@@ -46,7 +46,6 @@
                     <div class="layui-input-inline">
                         <input type="text" v-model="user.shopName" required lay-verify="required" placeholder="输入用户所属门店(可选)" autocomplete="off" class="layui-input">
                     </div>
-
                     <button type="button" class="layui-btn" @click="query()">检索</button>
                     <button type="button" class="layui-btn" @click="reset()">重置</button>
                 </div>
@@ -348,7 +347,6 @@
                         $.each(shops, function(i,item) {
                             $('#userBelong').append(new Option(item.shopName,item.shopNum));
                         })
-
                     }else{
                         alert(res.data.msg);
                     }
@@ -397,16 +395,15 @@
                                 layoutStr += "\n" + updateRes.userLocked.msg;
                             location.reload();
                         }
+                        //无返回信息时提示输入
                         if (layoutStr == "")
                             alert("请输入修改数据");
                         else alert(layoutStr);
                     }).catch();
-
                 });
             });
         });
     }
 </script>
 </body>
-
 </html>
