@@ -64,8 +64,8 @@
 				</tr>
 			</thead>
 			<tbody>
-				<tr v-for="(i,index) in shops">
-					<td>{{index+1}}</td>
+				<tr v-for="i in shops">
+					<td>{{i.shopNum}}</td>
 					<td>{{i.shopName}}</td>
 					<td>{{i.shopProvince}}</td>
 					<td>{{i.shopUrban}}</td>
@@ -217,14 +217,16 @@
 		});
 		$('body').on('click','#btn_no',function () {
 			layer.close(layer.index);
+			location.reload();
 		});
 	}
 
 	//修改门店信息弹出层函数
 	function update_lay(new_shop){
-		new_shop.roleId = null;
-		new_shop.shopNum = null;
-		new_shop.userLocked = "";
+		new_shop.shopAddress = "";
+		new_shop.shopName = "";
+		new_shop.shopProvince = "";
+		new_shop.shopUrban = "";
 		layui.use(['layer','form'],function () {
 			layer.open({
 				type:1,
@@ -266,6 +268,7 @@
 			});
 			$('body').on('click','#btn_no',function () {
 				layer.close(layer.index);
+				location.reload();
 			});
 			document.getElementById("shopName").value=new_shop.shopName;
 			//加载表单
@@ -274,7 +277,6 @@
 				//渲染表单
 				layui.form.render();
 				form.on('submit(btn_yes)', function (data) {
-					new_shop.shopNum = data.field.shopNum;
 					new_shop.shopName = data.field.shopName;
 					new_shop.shopProvince = data.field.shopProvince;
 					new_shop.shopUrban = data.field.shopUrban;
@@ -285,19 +287,11 @@
 							'shop/updateShopInfo',
 							new_shop
 					).then(res=>{
-						console.log(res);
-						var layoutStr = "";
-						//判定是否有返回信息
-						if(res.data.res){
-							//返回信息拼接
-							layoutStr += "请求发送成功";
-							location.reload();
-						}
-						//无返回信息时提示输入
-						if (layoutStr == "")
-							alert("请输入修改数据");
-						else alert(layoutStr);
-					}).catch();
+						alert(res.data.msg);
+					}).catch(res=>{
+						alert("函数执行失败!")
+					});
+					location.reload();
 				});
 			});
 		});
