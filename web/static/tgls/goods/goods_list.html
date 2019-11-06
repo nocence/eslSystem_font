@@ -31,6 +31,7 @@
 		<script src="../../framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
 		<!-- 公共样式 结束 -->
 		<!--js和vue引入-->
+		<script type="text/javascript" src="../../js/jsencrypt.min.js"></script>
 		<script type="text/javascript" src="../../js/vue.js"></script>
 		<script type="text/javascript" src="../../js/axios.min.js"></script>
 		<script type="text/javascript" src="../../js/util.js"></script>
@@ -57,8 +58,8 @@
 							<div class="layui-input-inline">
 								<input type="text" v-model="goods.goodsPlace" required lay-verify="required" placeholder="输入产地名称" autocomplete="off" class="layui-input">
 							</div>
-							<button  type="button" class="layui-btn" lay-filter="formDemo" @click="query()">检索</button>
-							<a class="layui-btn">导入商品</a>
+							<button type="button" class="layui-btn" @click="query()">检索</button>
+							<button type="button" class="layui-btn" @click="reset()">重置</button>
 						</div>
 					</form>
 
@@ -74,6 +75,7 @@
 							<th>商品产地</th>
 							<th>商品编码</th>
 							<th>商品价格</th>
+							<th>折扣价格</th>
 							<th>条形码编号</th>
 							<th>厂家电话</th>
 							<th>操作</th>
@@ -87,6 +89,7 @@
 							<td>{{i.goodsUnit}}</td>
 							<td>{{i.goodsPlace}}</td>
 							<td>{{i.goodsCode}}</td>
+							<td>{{i.goodsDiscount}}</td>
 							<td>{{i.goodsPrice}}</td>
 							<td>{{i.goodsBarcode}}</td>
 							<td>{{i.goodsTell}}</td>
@@ -98,9 +101,17 @@
 					</tbody>
 				</table>
 			</div>
+			<div style="text-align: center" id="paging"></div>
 		</div>
 		<script type="text/javascript">
-			new Vue({
+			//获取登录用户角色
+			var user = JSON.parse(sessionStorage.getItem("loginAdmin"));
+			//默认页数
+			var current_page = 1;
+			//默认每页容量
+			var limit = 10;
+
+			var ur = new Vue({
 				el:"#myVue",
 				data:{
 					goodss:[],
@@ -112,48 +123,144 @@
 				},
 				methods:{
 					query:function(){
-						if(this.goods.goodsName ==""){
-							this.goods.goodsName == null;
-						}
-						if(this.goods.goodsSpecs == ""){
-							this.goods.goodsSpecs == null;
-						}
+						user.pageNum = current_page;
+						user.pageSize = limit;
+						//模糊查询
+						if(this.goods.goodsName == ""){
+							this.goods.goodsName = null;
+						}else user.goodsName = this.goods.goodsName;
 						if(this.goods.goodsPlace == ""){
-							this.goods.goodsPlace == null;
-						}
+							this.goods.goodsPlace =null;
+						}else user.goodsPlace = this.goods.goodsPlace;
+						if(this.goods.goodsSpecs == ""){
+							this.goods.goodsSpecs = null
+						}else user.goodsSpecs = this.goods.goodsSpecs;
 						sendAxios(
-							"goods/getAllGoods",
-							this.goods
+								"goods/getAllGoods",
+								user
 						).then(res=>{
 							if(res.data.code==200){
-								this.goodss = res.data.list;
+								this.goodss =res.data.pageInfo.list;
+								//调用分页函数
+								page(res.data.pageInfo.total,current_page,limit);
 							}else{
 								alert("查询数据失败！")
 							}
 						}).catch(res=>{
 							alert("函数执行失败！")
-						})
+						});
+						//查询完后重置user实体
+						user = JSON.parse(sessionStorage.getItem("loginAdmin"));
 					},
-					creatImage:function(one){
-						sendAxios(
-							"image/creatImg",
-							one
-						).then(res=>{
-							if(res.data.code==200){
-								console.log(res.data.msg);
-								alert("图片生成成功，请移步图片管理查看和操作！");
-							}else{
-								alert("图片生成失败！")
-							}
-						}).catch(res=>{
-							alert("函数执行失败！")
-						})
+					//重置查询函数
+					reset:function () {
+						this.goods.goodsName = "";
+						this.goods.goodsPlace = "";
+						this.goods.goodsSpecs = "";
+						this.query();
+					},
+					updateShop:function (new_goods) {
+						update_lay(new_goods);
+					},
+					deleteShop:function (new_goods) {
+						delete_lay(new_goods);
 					}
 				},
 				created:function(){
 					this.query();
 				}
 			});
+
+			//分页函数
+			//参数：查询总条数，当前页数，每页上限
+			function page(count,curr,limit) {
+				layui.use('laypage',function () {
+					var laypage = layui.laypage;
+					laypage.render({
+						elem:'paging',
+						count:count,
+						limit:limit,
+						curr:curr,
+						theme:'#4e66f1',
+						jump:function (obj,first) {
+							//第一次不执行防止死循环
+							if(!first){
+								curr = obj.curr;
+
+								user.pageNum = curr;
+								user.pageSize = limit;
+								sendAxios(
+										"goods/getAllGoods",
+										user
+								).then(res=>{
+									if(res.data.code==200){
+										ur.goodss = res.data.pageInfo.list;
+									}else{
+										alert(res.data.msg);
+									}
+								}).catch(res=>{
+									alert("函数执行失败！")
+								})
+
+							}
+						}
+					});
+				});
+			}
+			// new Vue({
+			// 	el:"#myVue",
+			// 	data:{
+			// 		goodss:[],
+			// 		goods:{
+			// 			goodsName:"",
+			// 			goodsSpecs:"",
+			// 			goodsPlace:""
+			// 		}
+			// 	},
+			// 	methods:{
+			// 		query:function(){
+			// 			if(this.goods.goodsName ==""){
+			// 				this.goods.goodsName == null;
+			// 			}
+			// 			if(this.goods.goodsSpecs == ""){
+			// 				this.goods.goodsSpecs == null;
+			// 			}
+			// 			if(this.goods.goodsPlace == ""){
+			// 				this.goods.goodsPlace == null;
+			// 			}
+			// 			sendAxios(
+			// 				"goods/getAllGoods",
+			// 				this.goods
+			// 			).then(res=>{
+			// 				if(res.data.code==200){
+			// 					this.goodss = res.data.list;
+			// 				}else{
+			// 					alert("查询数据失败！")
+			// 				}
+			// 			}).catch(res=>{
+			// 				alert("函数执行失败！")
+			// 			})
+			// 		},
+			// 		creatImage:function(one){
+			// 			sendAxios(
+			// 				"image/creatImg",
+			// 				one
+			// 			).then(res=>{
+			// 				if(res.data.code==200){
+			// 					console.log(res.data.msg);
+			// 					alert("图片生成成功，请移步图片管理查看和操作！");
+			// 				}else{
+			// 					alert("图片生成失败！")
+			// 				}
+			// 			}).catch(res=>{
+			// 				alert("函数执行失败！")
+			// 			})
+			// 		}
+			// 	},
+			// 	created:function(){
+			// 		this.query();
+			// 	}
+			// });
 		</script>
 	</body>
 

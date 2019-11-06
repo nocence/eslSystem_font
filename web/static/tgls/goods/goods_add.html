@@ -25,6 +25,7 @@
 		<script src="../../framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
 		<!-- 公共样式 结束 -->
 		<!--js和vue引入-->
+		<script type="text/javascript" src="../../js/jsencrypt.min.js"></script>
 		<script type="text/javascript" src="../../js/vue.js"></script>
 		<script type="text/javascript" src="../../js/axios.min.js"></script>
 		<script type="text/javascript" src="../../js/util.js"></script>
@@ -80,6 +81,12 @@
 						<label class="layui-form-label">商品价格</label>
 						<div class="layui-input-block">
 							<input type="text" v-model="goods.goodsPrice" required lay-verify="required" placeholder="计量单位默认为：元；输入数字即可，例：335.52" autocomplete="off" class="layui-input">
+						</div>
+					</div>
+					<div class="layui-form-item">
+						<label class="layui-form-label">折扣价格</label>
+						<div class="layui-input-block">
+							<input type="text" v-model="goods.goodsDiscount" required lay-verify="required" placeholder="计量单位默认为：元；输入数字即可，例：335.52" autocomplete="off" class="layui-input">
 						</div>
 					</div>
 					<div class="layui-form-item">
