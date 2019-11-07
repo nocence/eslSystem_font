@@ -89,8 +89,8 @@
 							<td>{{i.goodsUnit}}</td>
 							<td>{{i.goodsPlace}}</td>
 							<td>{{i.goodsCode}}</td>
-							<td>{{i.goodsDiscount}}</td>
-							<td>{{i.goodsPrice}}</td>
+							<td>{{i.goodsDiscount}}元</td>
+							<td>{{i.goodsPrice}}元</td>
 							<td>{{i.goodsBarcode}}</td>
 							<td>{{i.goodsTell}}</td>
 							<td>
@@ -144,10 +144,11 @@
 								//调用分页函数
 								page(res.data.pageInfo.total,current_page,limit);
 							}else{
-								alert("查询数据失败！")
+								alert(res.data);
 							}
 						}).catch(res=>{
-							alert("函数执行失败！")
+							console.log(res);
+							alert(res.data.message);
 						});
 						//查询完后重置user实体
 						user = JSON.parse(sessionStorage.getItem("loginAdmin"));

@@ -105,6 +105,9 @@
 						<div class="layui-input-block">
 							<button type="button" class="layui-btn"  @click="submitGoods">立即提交</button>
 							<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+							<button type="button" class="layui-btn" id="uploadFile">
+								<i class="layui-icon">&#xe67c;</i>文件导入
+							</button>
 						</div>
 					</div>
 				</form>
@@ -134,6 +137,24 @@
 						})
 					}
 				}
+			});
+
+			layui.use('upload', function() {
+				var upload = layui.upload;
+
+				//执行实例
+				var uploadInst = upload.render({
+					elem: '#uploadFile' //绑定元素
+					,url: 'http://localhost:8080/eslsystem/goods/uploadFile' //上传接口
+					,auto: true //选择文件后自动上传
+					,accept: 'file'//允许文件类型
+					,done: function(res){
+					//上传完毕回调
+				}
+					,error: function(){
+					//请求异常回调
+				}
+				});
 			});
 		</script>
 	</body>
