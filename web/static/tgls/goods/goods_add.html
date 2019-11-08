@@ -148,11 +148,16 @@
 					,url: 'http://localhost:8080/eslsystem/goods/uploadFile' //上传接口
 					,auto: true //选择文件后自动上传
 					,accept: 'file'//允许文件类型
+					,exts: 'xlsx/xls'//支持文件的后缀类型
 					,done: function(res){
 					//上传完毕回调
+						if(res.data.code == 200)
+							alert(res.data.msg);
+						else alert(res.data.msg);
 				}
 					,error: function(){
 					//请求异常回调
+						alert("上传出错，注意excel表格中不能所有元素不能有空!");
 				}
 				});
 			});
