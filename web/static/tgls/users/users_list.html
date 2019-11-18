@@ -321,7 +321,10 @@
                    '                    <button class="layui-btn layui-btn-sm" type="button" id="btn_no">取消</button>\n' +
                    '                </div>\n' +
                    '            </div>\n' +
-                   '        </form>'
+                   '        </form>',
+               cancel: function () {
+                   location.reload();
+               }
            });
             $('body').on('click','#btn_no',function () {
                 layer.close(layer.index);

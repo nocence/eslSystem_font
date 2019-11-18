@@ -94,7 +94,7 @@
 							<td>{{i.goodsBarcode}}</td>
 							<td>{{i.goodsTell}}</td>
 							<td>
-								<button class="layui-btn layui-btn-xs" onclick="updateBut()">修改</button>
+								<button class="layui-btn layui-btn-xs" @click="updateGoods(i)">修改</button>
 								<button class="layui-btn layui-btn-xs" @click="creatImage(i)">生成图片</button>
 							</td>
 						</tr>
@@ -160,11 +160,8 @@
 						this.goods.goodsSpecs = "";
 						this.query();
 					},
-					updateShop:function (new_goods) {
+					updateGoods:function (new_goods) {
 						update_lay(new_goods);
-					},
-					deleteShop:function (new_goods) {
-						delete_lay(new_goods);
 					}
 				},
 				created:function(){
@@ -205,6 +202,143 @@
 
 							}
 						}
+					});
+				});
+			}
+
+			//修改商品信息弹出层函数
+			function update_lay(new_goods){
+				layui.use(['layer','form'],function () {
+					layer.open({
+						type:1,
+						title:"修改信息",
+						area:["500px","650px"],
+						content:'        <form class="layui-form" style="padding-top:30px;width: 500px;">\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <label class="layui-form-label">商品名</label>\n' +
+								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+								'                    <input name="goodsName" id="goodsName" type="text" placeholder="商品名" autocomplete="name" class="layui-input">\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <label class="layui-form-label">商品规格</label>\n' +
+								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+								'                    <input name="goodsSpecs" id="goodsSpecs" type="text" placeholder="商品规格"  autocomplete="off" class="layui-input">\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <label class="layui-form-label">计量单位</label>\n' +
+								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+								'                    <input name="goodsUnit" id="goodsUnit" type="text" placeholder="商品计量单位"  autocomplete="off" class="layui-input">\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <label class="layui-form-label">商品产地</label>\n' +
+								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+								'                    <input name="goodsPlace" id="goodsPlace" type="text" placeholder="商品产地"  autocomplete="off" class="layui-input">\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <label class="layui-form-label">商品编号</label>\n' +
+								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+								'                    <input name="goodsCode" id="goodsCode" type="text" placeholder="商品编号"  autocomplete="off" class="layui-input">\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <label class="layui-form-label">商品售价</label>\n' +
+								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+								'                    <input name="goodsPrice" id="goodsPrice" type="text" placeholder="商品售价"  autocomplete="off" class="layui-input">\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <label class="layui-form-label">折扣价格</label>\n' +
+								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+								'                    <input name="goodsDiscount" id="goodsDiscount" type="text" placeholder="折扣价格"  autocomplete="off" class="layui-input">\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <label class="layui-form-label">条形码编号</label>\n' +
+								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+								'                    <input name="goodsBarcode" id="goodsBarcode" type="text" placeholder="条形码编号"  autocomplete="off" class="layui-input">\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <label class="layui-form-label">厂家电话</label>\n' +
+								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+								'                    <input name="goodsTell" id="goodsTell" type="text" placeholder="厂家电话"  autocomplete="off" class="layui-input">\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <div class="layui-input-block">\n' +
+								'                    <p>*不做更改项请留空</p>\n' +
+								'                    <button lay-submit lay-filter="btn_yes" class="layui-btn layui-btn-sm" type="button" id="btn_yes">立即提交</button>\n' +
+								'                    <button class="layui-btn layui-btn-sm" type="button" id="btn_no">取消</button>\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'        </form>',
+						cancel: function () {
+							location.reload();
+						}
+					});
+					$('body').on('click','#btn_no',function () {
+						layer.close(layer.index);
+						location.reload();
+					});
+					document.getElementById("goodsName").value=new_goods.goodsName;
+					document.getElementById("goodsSpecs").value=new_goods.goodsSpecs;
+					document.getElementById("goodsUnit").value=new_goods.goodsUnit;
+					document.getElementById("goodsPlace").value=new_goods.goodsPlace;
+					document.getElementById("goodsCode").value=new_goods.goodsCode;
+					document.getElementById("goodsDiscount").value=new_goods.goodsDiscount;
+					document.getElementById("goodsPrice").value=new_goods.goodsPrice;
+					document.getElementById("goodsBarcode").value=new_goods.goodsBarcode;
+					document.getElementById("goodsTell").value=new_goods.goodsTell;
+
+					//加载表单
+					layui.use('form', function(){
+						var form = layui.form;
+						//渲染表单
+						layui.form.render();
+						form.on('submit(btn_yes)', function (data) {
+							if(new_goods.goodsName == data.field.goodsName)
+								new_goods.goodsName = "";
+							else new_goods.goodsName = data.field.goodsName;
+							if(new_goods.goodsSpecs == data.field.goodsSpecs)
+								new_goods.goodsSpecs = "";
+							else new_goods.goodsSpecs = data.field.goodsSpecs;
+							if(new_goods.goodsUnit == data.field.goodsUnit)
+								new_goods.goodsUnit = "";
+							else new_goods.goodsUnit = data.field.goodsUnit;
+							if(new_goods.goodsPlace == data.field.goodsPlace)
+								new_goods.goodsPlace = "";
+							else new_goods.goodsPlace = data.field.goodsPlace;
+							if(new_goods.goodsCode == data.field.goodsCode)
+								new_goods.goodsCode = "";
+							else new_goods.goodsCode = data.field.goodsCode;
+							if (new_goods.goodsDiscount == data.field.goodsDiscount)
+								new_goods.goodsDiscount = "";
+							else new_goods.goodsDiscount = data.field.goodsDiscount;
+							if (new_goods.goodsPrice == data.field.goodsPrice)
+								new_goods.goodsPrice = "";
+							else new_goods.goodsPrice = data.field.goodsPrice;
+							if (new_goods.goodsBarcode == data.field.goodsBarcode)
+								new_goods.goodsBarcode = "";
+							else new_goods.goodsBarcode = data.field.goodsBarcode;
+							if (new_goods.goodsTell == data.field.goodsTell)
+								new_goods.goodsTell = "";
+							else new_goods.goodsTell = data.field.goodsTell;
+							console.log(new_goods);
+							sendAxios(
+									'goods/updateGoodsInfo',
+									new_goods
+							).then(res=>{
+								alert(res.data.msg);
+								location.reload();
+							}).catch(res=>{
+								alert("函数执行失败!");
+								location.reload();
+							});
+						});
 					});
 				});
 			}
