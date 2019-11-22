@@ -162,6 +162,9 @@
 					},
 					updateGoods:function (new_goods) {
 						update_lay(new_goods);
+					},
+					creatImage:function (new_goods) {
+						createImge_lay(new_goods);
 					}
 				},
 				created:function(){
@@ -342,60 +345,120 @@
 					});
 				});
 			}
-			// new Vue({
-			// 	el:"#myVue",
-			// 	data:{
-			// 		goodss:[],
-			// 		goods:{
-			// 			goodsName:"",
-			// 			goodsSpecs:"",
-			// 			goodsPlace:""
-			// 		}
-			// 	},
-			// 	methods:{
-			// 		query:function(){
-			// 			if(this.goods.goodsName ==""){
-			// 				this.goods.goodsName == null;
-			// 			}
-			// 			if(this.goods.goodsSpecs == ""){
-			// 				this.goods.goodsSpecs == null;
-			// 			}
-			// 			if(this.goods.goodsPlace == ""){
-			// 				this.goods.goodsPlace == null;
-			// 			}
-			// 			sendAxios(
-			// 				"goods/getAllGoods",
-			// 				this.goods
-			// 			).then(res=>{
-			// 				if(res.data.code==200){
-			// 					this.goodss = res.data.list;
-			// 				}else{
-			// 					alert("查询数据失败！")
-			// 				}
-			// 			}).catch(res=>{
-			// 				alert("函数执行失败！")
-			// 			})
-			// 		},
-			// 		creatImage:function(one){
-			// 			sendAxios(
-			// 				"image/creatImg",
-			// 				one
-			// 			).then(res=>{
-			// 				if(res.data.code==200){
-			// 					console.log(res.data.msg);
-			// 					alert("图片生成成功，请移步图片管理查看和操作！");
-			// 				}else{
-			// 					alert("图片生成失败！")
-			// 				}
-			// 			}).catch(res=>{
-			// 				alert("函数执行失败！")
-			// 			})
-			// 		}
-			// 	},
-			// 	created:function(){
-			// 		this.query();
-			// 	}
-			// });
+
+			//生成图片弹出层
+			function createImge_lay(new_goods){
+				layui.use(['layer','form'],function () {
+					layer.open({
+						type:1,
+						title:"请选择生成所选用的模板",
+						area:["1000px","900px"],
+						content:'        <form class="layui-form" style="padding-top:30px;width: 500px;">\n' +
+								'            <div class="layui-form-item">\n' +
+								'            	 <div class="layui-input-block">\n' +
+								'				 <table class="layui-table">\n' +
+								' 					<tbody>\n' +
+								' 						<tr>\n' +
+								' 							<th>\n' +
+								' 						 		<img src="../../images/template/Black250122.bmp">\n' +
+								'    	  				 		<input type="radio" name="template" lay-filter="template" value="11" title="2.13寸黑白模板">\n' +
+								' 							</th>\n' +
+								' 							<th>\n' +
+								' 						 		<img src="../../images/template/Red250122.bmp">\n' +
+								'      					 		<input type="radio" name="template" lay-filter="template" value="12" title="2.13寸黑白红模板">\n' +
+								' 							</th>\n' +
+								'						</tr>\n' +
+								' 						<tr>\n' +
+								' 							<th>\n' +
+								' 						 		<img src="../../images/template/Black296128.bmp">\n' +
+								'    	  						<input type="radio" name="template" lay-filter="template" value="21" title="2.9寸黑白模板">\n' +
+								' 							</th>\n' +
+								' 							<th>\n' +
+								' 						 		<img src="../../images/template/Red296128.bmp">\n' +
+								'    	  				 		<input type="radio" name="template" lay-filter="template" value="22" title="2.9寸黑白红模板">\n' +
+								' 							</th>\n' +
+								'						</tr>\n' +
+								' 						<tr>\n' +
+								' 							<th>\n' +
+								' 						 		<img src="../../images/template/Black400300.bmp">\n' +
+								'    	  				 		<input type="radio" name="template" lay-filter="template" value="31" title="4.2寸黑白模板">\n' +
+								' 							</th>\n' +
+								' 							<th>\n' +
+								' 						 		<img src="../../images/template/Red400300.bmp">\n' +
+								'    	  				 		<input type="radio" name="template" lay-filter="template" value="32" title="4.2寸黑白红模板">\n' +
+								' 							</th>\n' +
+								'						</tr>\n' +
+								'					</tbody>\n' +
+								' 				 </table>\n' +
+								'    			 </div>' +
+								'            </div>\n' +
+								'            <div class="layui-form-item" style="text-align:center">\n' +
+								'                <div class="layui-input-block" style="text-align:center">\n' +
+								'                    <button lay-submit lay-filter="btn_yes" class="layui-btn layui-btn-sm" type="button" id="btn_yes">立即提交</button>\n' +
+								'                    <button class="layui-btn layui-btn-sm" type="button" id="btn_no">取消</button>\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'        </form>',
+						cancel: function () {
+							location.reload();
+						}
+					})
+					$('body').on('click','#btn_no',function () {
+						layer.close(layer.index);
+						location.reload();
+					});
+
+					//加载表单
+					layui.use('form', function(){
+						var form = layui.form;
+						var selectGoods = {
+							"temColor":"",
+							"resolution":"",
+							"goodsName":"",
+							"goodsSpecs":""
+						};
+						//渲染表单
+						layui.form.render();
+						form.on('radio(template)', function (data) {
+							if(data.value == 11){
+								selectGoods.temColor = "black";
+								selectGoods.resolution = "250122"
+							}else if (data.value == 12){
+								selectGoods.temColor = "red";
+								selectGoods.resolution = "250122"
+							}else if (data.value == 21){
+								selectGoods.temColor = "black";
+								selectGoods.resolution = "296128"
+							}else if (data.value == 22){
+								selectGoods.temColor = "red";
+								selectGoods.resolution = "296128"
+							}else if (data.value == 31){
+								selectGoods.temColor = "black";
+								selectGoods.resolution = "400300"
+							}else if (data.value == 32){
+								selectGoods.temColor = "red";
+								selectGoods.resolution = "400300"
+							}
+						});
+						form.on('submit(btn_yes)', function (data) {
+							selectGoods.goodsName = new_goods.goodsName;
+							selectGoods.goodsSpecs = new_goods.goodsSpecs;
+							console.log(new_goods);
+							sendAxios(
+									'goods/createImge',
+									selectGoods
+							).then(res=>{
+								alert(res.data.msg);
+								location.reload();
+							}).catch(res=>{
+								alert("函数执行失败!");
+								location.reload();
+							});
+						});
+					});
+				})
+			}
+
 		</script>
 	</body>
 
