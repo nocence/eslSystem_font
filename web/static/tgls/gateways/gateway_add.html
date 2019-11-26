@@ -25,10 +25,10 @@
 		<script src="../../framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
 		<!-- 公共样式 结束 -->
 		<!--js和vue引入-->
+		<script type="text/javascript" src="../../js/jsencrypt.min.js"></script>
 		<script type="text/javascript" src="../../js/vue.js"></script>
 		<script type="text/javascript" src="../../js/axios.min.js"></script>
 		<script type="text/javascript" src="../../js/util.js"></script>
-        <script type="text/javascript" src="../../js/popper.min.js"></script>
 		<style>
 			.layui-form{
 				margin-right: 30%;
@@ -39,15 +39,13 @@
 
 	<body>
 		<div id="myVue">
-			<div class="cBody">
+			<div class="cBody" style="width: 500px;height: 800px">
 				<form id="addForm" class="layui-form" >
 					<div class="layui-form-item">
 						<label class="layui-form-label">选择门店</label>
 						<div class="layui-input-inline">
-                            <select name="modules" lay-verify="required"  v-model="wifis.storeId">
-                                <option value="">--请选择--</option>
-                                <option value="store.storeId" :value="store.storeId" v-for="store in allStores">{{store.storeName}}</option>
-                            </select>
+							<select name="gatewayBelong" id="gatewayBelong" lay-filter="shopNum" required lay-verify="required|identity">
+							</select>
 						</div>
 					</div>
 					<div class="layui-form-item">
@@ -76,60 +74,69 @@
 		</div>
 
 		<script type="text/javascript">
+
+			//加载layui_form
+			layui.use('form', function(){
+				var form = layui.form;
+				//检测下拉选择事件
+				//通过lay-filter进行检测，并且获取value
+				form.on('select(shopNum)', function(data){
+					eu.shopNum=data.value; //得到被选中的值
+				});
+			});
+
+			layui.use(['form','upload','layer'], function(){
+				var form = layui.form;
+				sendAxios(
+						"gateway/getShops",
+						user
+				).then(res=>{
+					if(res.data.code==200){
+						var allStores = res.data.list;
+						$("#gatewayBelong").empty();
+						$.each(allStores, function(i,item) {
+							console.log(item.shopName,item.shopNum);
+							$('#gatewayBelong').append(new Option(item.shopName,item.shopNum));
+						});
+						layui.form.render("select");
+					}else{
+						alert(res.data.msg);
+					}
+				}).catch(res=>{
+					alert("函数执行失败！")
+				});
+
+			});
+
+			var user = JSON.parse(sessionStorage.getItem("loginAdmin"));
 			var eu = new Vue({
 				el:"#myVue",
 				data:{
 					wifis:{
-                        storeId:"",
-                        wifiIp:""
-                    },
-                    /*获取到的门店列表*/
-                    allStores:[]
+                        shopNum:"",
+						gatewayIP:""
+                    }
 				},
 				methods:{
 					submit:function(){
 						sendAxios(
-							"wifis/addwifi",
+							"gateway/addGateway",
 							this.wifis
 						).then(res=>{
 							if(res.data.code==200){
-								alert("添加wifi信息成功！");
+								alert("添加网关信息成功！");
 							}else{
-								alert("添加wifi信息失败！")
+								alert("添加网关信息失败！")
 							}
 							location.reload();
 						}).catch(res=>{
 							alert("函数执行失败！")
 						})
-					},
-                    getAllStores:function(){
-                        sendAxios(
-                            "wifis/getAllStores",
-                            {}
-                        ).then(res=>{
-                            if(res.data.code==200){
-                                this.allStores = res.data.list;
-                            }else{
-                                alert("获取门店列表失败")
-                            }
-                        }).catch(res=>{
-                            alert("函数执行失败！")
-                        })
-                    }
-				},
-                created:function(){
-				    this.getAllStores();
-				    /*Vue要拿到layUI下拉框的值，要使用layui的use函数，绑定v-bind:value时，将要绑定的属性先定义，再在form.on里面赋值*/
-				    this1 = this.wifis;
-                    layui.use('form', function(){
-                        var form = layui.form;
-                        form.render();
-                        form.on('select', function(data){
-                            this1.storeId=data.value; //得到被选中的值
-                        });
-                    });
-                }
+					}
+				}
 			});
+
+
 		</script>
 	</body>
 
