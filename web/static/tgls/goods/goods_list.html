@@ -422,22 +422,22 @@
 						form.on('radio(template)', function (data) {
 							if(data.value == 11){
 								selectGoods.temColor = "black";
-								selectGoods.resolution = "250122"
+								selectGoods.resolution = "250*122"
 							}else if (data.value == 12){
 								selectGoods.temColor = "red";
-								selectGoods.resolution = "250122"
+								selectGoods.resolution = "250*122"
 							}else if (data.value == 21){
 								selectGoods.temColor = "black";
-								selectGoods.resolution = "296128"
+								selectGoods.resolution = "296*128"
 							}else if (data.value == 22){
 								selectGoods.temColor = "red";
-								selectGoods.resolution = "296128"
+								selectGoods.resolution = "296*128"
 							}else if (data.value == 31){
 								selectGoods.temColor = "black";
-								selectGoods.resolution = "400300"
+								selectGoods.resolution = "400*300"
 							}else if (data.value == 32){
 								selectGoods.temColor = "red";
-								selectGoods.resolution = "400300"
+								selectGoods.resolution = "400*300"
 							}
 						});
 						form.on('submit(btn_yes)', function (data) {
@@ -445,7 +445,7 @@
 							selectGoods.goodsSpecs = new_goods.goodsSpecs;
 							console.log(new_goods);
 							sendAxios(
-									'goods/createImge',
+									'goods/createImage',
 									selectGoods
 							).then(res=>{
 								alert(res.data.msg);
