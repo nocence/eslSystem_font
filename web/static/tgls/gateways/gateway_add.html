@@ -51,7 +51,7 @@
 					<div class="layui-form-item">
 						<label class="layui-form-label">设置IP</label>
 						<div class="layui-input-inline shortInput">
-							<input type="text" v-model="wifis.wifiIp" required lay-verify="required|identity" placeholder="例:192.168.0.122"autocomplete="off" class="layui-input">
+							<input type="text" v-model="wifis.gatewayIP" required lay-verify="required|identity" placeholder="例:192.168.0.122"autocomplete="off" class="layui-input">
 						</div>
 					</div>
 					<!--<div class="layui-form-item">
@@ -81,7 +81,7 @@
 				//检测下拉选择事件
 				//通过lay-filter进行检测，并且获取value
 				form.on('select(shopNum)', function(data){
-					eu.shopNum=data.value; //得到被选中的值
+					eu.wifis.gatewayShopNum=data.value; //得到被选中的值
 				});
 			});
 
@@ -94,6 +94,7 @@
 					if(res.data.code==200){
 						var allStores = res.data.list;
 						$("#gatewayBelong").empty();
+						$('#gatewayBelong').append(new Option(""));
 						$.each(allStores, function(i,item) {
 							console.log(item.shopName,item.shopNum);
 							$('#gatewayBelong').append(new Option(item.shopName,item.shopNum));
@@ -113,7 +114,7 @@
 				el:"#myVue",
 				data:{
 					wifis:{
-                        shopNum:"",
+                        gatewayShopNum:"",
 						gatewayIP:""
                     }
 				},
@@ -124,9 +125,9 @@
 							this.wifis
 						).then(res=>{
 							if(res.data.code==200){
-								alert("添加网关信息成功！");
+								alert(res.data.msg);
 							}else{
-								alert("添加网关信息失败！")
+								alert(res.data.msg);
 							}
 							location.reload();
 						}).catch(res=>{

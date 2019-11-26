@@ -12,19 +12,20 @@
 		<title>BlueToothPrice V1.0</title>
 
 		<!-- 公共样式 开始 -->
-		<link rel="stylesheet" type="text/css" href="/static/css/base.css">
-		<link rel="stylesheet" type="text/css" href="/static/css/iconfont.css">
-		<script type="text/javascript" src="/static/framework/jquery-1.11.3.min.js"></script>
-		<link rel="stylesheet" type="text/css" href="/static/layui/css/layui.css">
-		<script type="text/javascript" src="/static/layui/layui.js"></script>
+		<link rel="stylesheet" type="text/css" href="../../css/base.css">
+		<link rel="stylesheet" type="text/css" href="../../css/iconfont.css">
+		<script type="text/javascript" src="../../framework/jquery-1.11.3.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="../../layui/css/layui.css">
+		<script type="text/javascript" src="../../layui/layui.js"></script>
 		<!-- 滚动条插件 -->
-		<link rel="stylesheet" type="text/css" href="/static/css/jquery.mCustomScrollbar.css">
-		<script src="/static/framework/jquery-ui-1.10.4.min.js"></script>
-		<script src="/static/framework/jquery.mousewheel.min.js"></script>
-		<script src="/static/framework/jquery.mCustomScrollbar.min.js"></script>
-		<script src="/static/framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
+		<link rel="stylesheet" type="text/css" href="../../css/jquery.mCustomScrollbar.css">
+		<script src="../../framework/jquery-ui-1.10.4.min.js"></script>
+		<script src="../../framework/jquery.mousewheel.min.js"></script>
+		<script src="../../framework/jquery.mCustomScrollbar.min.js"></script>
+		<script src="../../framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
 		<!-- 公共样式 结束 -->
 		<!--js和vue引入-->
+		<script type="text/javascript" src="../../js/jsencrypt.min.js"></script>
 		<script type="text/javascript" src="../../js/vue.js"></script>
 		<script type="text/javascript" src="../../js/axios.min.js"></script>
 		<script type="text/javascript" src="../../js/util.js"></script>
@@ -37,12 +38,13 @@
 					<form class="layui-form" action="">
 						<div class="layui-form-item">
 							<div class="layui-input-inline">
-								<input type="text" v-model="storeWifis.storeName" required lay-verify="required" placeholder="输入门店名称" autocomplete="off" class="layui-input">
+								<input type="text" v-model="gateway.shopName" required lay-verify="required" placeholder="输入门店名称" autocomplete="off" class="layui-input">
 							</div>
 							<div class="layui-input-inline">
-								<input type="text" v-model="storeWifis.wifiIp" required lay-verify="required" placeholder="输入WIFI的ip，例：192.168.0.122" autocomplete="off" class="layui-input">
+								<input type="text" v-model="gateway.gatewayIP" required lay-verify="required" placeholder="输入WIFI的ip，例：192.168.0.122" autocomplete="off" class="layui-input">
 							</div>
 							<button type="button" class="layui-btn" @click="query()">检索</button>
+							<button type="button" class="layui-btn" @click="reset()">重置</button>
 						</div>
 					</form>
 				</div>
@@ -52,59 +54,241 @@
 						<tr>
 							<th>序号</th>
 							<th>门店名称</th>
-							<th>WIFIip</th>
+							<th>网关IP</th>
 							<th>使用状态</th>
 							<th>操作</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr v-for="(i,index) in wifis">
+						<tr v-for="(i,index) in gateways">
 							<td>{{index+1}}</td>
-							<td>{{i.storeName}}</td>
-							<td>{{i.wifiIp}}</td>
-							<td>{{i.state}}</td>
+							<td>{{i.shopName}}</td>
+							<td>{{i.gatewayIP}}</td>
+							<td>{{i.gatewayType}}</td>
 							<td>
-								<button class="layui-btn layui-btn-xs">修改</button>
-								<button class="layui-btn layui-btn-xs">基本信息</button>
+								<button class="layui-btn layui-btn-xs" type="button" @click="updateGateway(i)">修改</button>
+								<button class="layui-btn layui-btn-xs" type="button" @click="deleteGateway(i)">删除</button>
 							</td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
+			<div style="text-align: center" id="paging"></div>
 		</div>
 		<script type="text/javascript">
-			new Vue({
+
+			//获取登录用户角色
+			var user = JSON.parse(sessionStorage.getItem("loginAdmin"));
+			//默认页数
+			var current_page = 1;
+			//默认每页容量
+			var limit = 10;
+
+			var eu = new Vue({
 				el:"#myVue",
 				data:{
-					storeWifis:{},
-					wifis:[]
+					gateways:[],
+					gateway:{
+						userName:"",
+						shopName:"",
+						gatewayIP:"",
+						gatewayType:"",
+						pageNum:"",
+						pageSize:"",
+					}
 				},
 				methods:{
 					query:function(){
-						if(this.storeWifis.storeName == ""){
-							this.storeWifis.storeName == null
+						this.gateway.pageNum = current_page;
+						this.gateway.pageSize = limit;
+						if(this.gatewayShopName == ""){
+							this.gateway.shopName = null
 						}
-						if(this.storeWifis.wifiIp ==""){
-							this.storeWifis.wifiIp ==null
+						if(this.gateway.gatewayIP ==""){
+							this.gateway.gatewayIP =null
 						}
 						sendAxios(
-								"wifis/showWifis",
-								this.storeWifis
+								"gateway/getAllGateways",
+								this.gateway
 						).then(res=>{
 							if(res.data.code==200){
-								this.wifis =res.data.list;
+								this.gateways =res.data.pageInfo.list;
+								//调用分页函数
+								page(res.data.pageInfo.total,current_page,limit);
 							}else{
-								alert("查询数据失败！")
+								alert(res.data.message);
 							}
 						}).catch(res=>{
 							alert("函数执行失败！")
 						})
+					},
+					reset:function () {
+						this.gateway.gatewayShopName = "";
+						this.gateway.gatewayIP = "";
+						this.query();
+					},
+					updateGateway:function (new_gateway) {
+						update_lay(new_gateway);
+					},
+					deleteGateway:function (new_gateway) {
+						delete_lay(new_gateway);
 					}
 				},
 				created:function(){
+					this.gateway.userName = user.userName;
 					this.query();
 				}
 			});
+
+			//分页函数
+			//参数：查询总条数，当前页数，每页上限
+			function page(count,curr,limit) {
+				layui.use('laypage',function () {
+					var laypage = layui.laypage;
+					laypage.render({
+						elem:'paging',
+						count:count,
+						limit:limit,
+						curr:curr,
+						theme:'#4e66f1',
+						jump:function (obj,first) {
+							//第一次不执行防止死循环
+							if(!first){
+								curr = obj.curr;
+
+								eu.gateway.pageNum = curr;
+								eu.gateway.pageSize = limit;
+								sendAxios(
+										"gateway/getAllGateways",
+										eu.gateway
+								).then(res=>{
+									if(res.data.code==200){
+										ur.gateways = res.data.pageInfo.list;
+									}else{
+										alert(res.data.msg);
+									}
+								}).catch(res=>{
+									alert("函数执行失败！")
+								})
+							}
+						}
+					});
+				});
+			}
+
+
+			//删除门店信息弹出层函数
+			function delete_lay(new_gateway) {
+				layui.use(['layer'],function () {
+					layer.open({
+						type:1,
+						title:"请确认",
+						area:["280px","210px"],
+						content:'		<div align="center">\n' +
+								'               <h2 style="padding-top:30px;padding-bottom:30px;">是否确认删除该网关</h2>\n' +
+								' 			    <button class="layui-btn layui-btn-sm" type="button" id="btn_yes">确认</button>\n' +
+								' 			    <button class="layui-btn layui-btn-sm" type="button" id="btn_no">取消</button>\n' +
+								'           </div>'
+					});
+				});
+				$('body').on('click','#btn_yes',function () {
+					sendAxios(
+							'shop/deleteShopInfo',
+							new_gateway
+					).then(res=>{
+						if(res.data.code == 200){
+							alert(res.data.msg);
+							location.reload();
+						}else {
+							alert(res.data.msg);
+							location.reload();
+						}
+					}).catch();
+				});
+				$('body').on('click','#btn_no',function () {
+					layer.close(layer.index);
+					location.reload();
+				});
+			}
+			//修改门店信息弹出层函数
+			function update_lay(new_shop){
+				new_shop.shopAddress = "";
+				new_shop.shopName = "";
+				new_shop.shopProvince = "";
+				new_shop.shopUrban = "";
+				layui.use(['layer','form'],function () {
+					layer.open({
+						type:1,
+						title:"修改信息",
+						area:["500px","500px"],
+						content:'        <form class="layui-form" style="padding-top:30px;width: 500px;">\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <label class="layui-form-label">门店名</label>\n' +
+								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+								'                    <input name="shopName" id="shopName" type="text" placeholder="门店名" autocomplete="name" class="layui-input">\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <label class="layui-form-label">所属省份</label>\n' +
+								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+								'                    <input name="shopProvince" id="shopProvince" type="text" placeholder="所属省份"  autocomplete="off" class="layui-input">\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <label class="layui-form-label">所属区域</label>\n' +
+								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+								'                    <input name="shopUrban" id="shopUrban" type="text" placeholder="所属区域"  autocomplete="off" class="layui-input">\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <label class="layui-form-label">详细地址</label>\n' +
+								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+								'                    <input name="shopAddress" id="shopAddress" type="text" placeholder="详细地址"  autocomplete="off" class="layui-input">\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <div class="layui-input-block">\n' +
+								'                    <p>*不做更改项请留空</p>\n' +
+								'                    <button lay-submit lay-filter="btn_yes" class="layui-btn layui-btn-sm" type="button" id="btn_yes">立即提交</button>\n' +
+								'                    <button class="layui-btn layui-btn-sm" type="button" id="btn_no">取消</button>\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'        </form>',
+						cancel: function () {
+							location.reload();
+						}
+					});
+					$('body').on('click','#btn_no',function () {
+						layer.close(layer.index);
+						location.reload();
+					});
+					document.getElementById("shopName").value=new_shop.shopName;
+					//加载表单
+					layui.use('form', function(){
+						var form = layui.form;
+						//渲染表单
+						layui.form.render();
+						form.on('submit(btn_yes)', function (data) {
+							new_shop.shopName = data.field.shopName;
+							new_shop.shopProvince = data.field.shopProvince;
+							new_shop.shopUrban = data.field.shopUrban;
+							new_shop.shopAddress = data.field.shopAddress;
+							new_shop.userName = user.userName;
+							console.log(new_shop);
+							sendAxios(
+									'shop/updateShopInfo',
+									new_shop
+							).then(res=>{
+								alert(res.data.msg);
+							}).catch(res=>{
+								alert("函数执行失败!")
+							});
+							location.reload();
+						});
+					});
+				});
+			}
+
 		</script>
 	</body>
 
