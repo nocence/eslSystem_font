@@ -40,9 +40,6 @@
 							<div class="layui-input-inline">
 								<input type="text" v-model="gateway.shopName" required lay-verify="required" placeholder="输入门店名称" autocomplete="off" class="layui-input">
 							</div>
-							<div class="layui-input-inline">
-								<input type="text" v-model="gateway.gatewayIP" required lay-verify="required" placeholder="输入WIFI的ip，例：192.168.0.122" autocomplete="off" class="layui-input">
-							</div>
 							<button type="button" class="layui-btn" @click="query()">检索</button>
 							<button type="button" class="layui-btn" @click="reset()">重置</button>
 						</div>
@@ -90,10 +87,9 @@
 					gateways:[],
 					gateway:{
 						userName:"",
-						shopName:"",
-						shopNum:"",
 						gatewayIP:"",
 						gatewayType:"",
+						shopName:"",
 						pageNum:"",
 						pageSize:"",
 					}
@@ -102,11 +98,8 @@
 					query:function(){
 						this.gateway.pageNum = current_page;
 						this.gateway.pageSize = limit;
-						if(this.gatewayShopName == ""){
+						if(this.gateway.shopName == ""){
 							this.gateway.shopName = null
-						}
-						if(this.gateway.gatewayIP ==""){
-							this.gateway.gatewayIP =null
 						}
 						sendAxios(
 								"gateway/getAllGateways",
@@ -213,8 +206,8 @@
 			}
 			//修改网关信息弹出层函数
 			function update_lay(new_gateway){
-				var tempShopNum = new_gateway.shopNum;
-				new_gateway.shopNum = null;
+				var tempShopNum = new_gateway.gatewayShopNum;
+				new_gateway.gatewayShopNum = null;
 				layui.use(['layer','form'],function () {
 					layer.open({
 						type:1,
@@ -293,7 +286,7 @@
 
 						form.on('select(shopNum)',function(data) {
 							if (data.value != tempShopNum)
-								new_gateway.shopNum = data.value;
+								new_gateway.gatewayShopNum = data.value;
 						});
 
 						form.on('submit(btn_yes)', function (data) {
