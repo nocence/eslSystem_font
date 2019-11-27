@@ -91,6 +91,7 @@
 					gateway:{
 						userName:"",
 						shopName:"",
+						shopNum:"",
 						gatewayIP:"",
 						gatewayType:"",
 						pageNum:"",
@@ -177,7 +178,7 @@
 			}
 
 
-			//删除门店信息弹出层函数
+			//删除网关信息弹出层函数
 			function delete_lay(new_gateway) {
 				layui.use(['layer'],function () {
 					layer.open({
@@ -193,7 +194,7 @@
 				});
 				$('body').on('click','#btn_yes',function () {
 					sendAxios(
-							'shop/deleteShopInfo',
+							'gateway/deleteGateway',
 							new_gateway
 					).then(res=>{
 						if(res.data.code == 200){
@@ -210,40 +211,33 @@
 					location.reload();
 				});
 			}
-			//修改门店信息弹出层函数
-			function update_lay(new_shop){
-				new_shop.shopAddress = "";
-				new_shop.shopName = "";
-				new_shop.shopProvince = "";
-				new_shop.shopUrban = "";
+			//修改网关信息弹出层函数
+			function update_lay(new_gateway){
+				var tempShopNum = new_gateway.shopNum;
+				new_gateway.shopNum = null;
 				layui.use(['layer','form'],function () {
 					layer.open({
 						type:1,
 						title:"修改信息",
-						area:["500px","500px"],
+						area:["500px","400px"],
 						content:'        <form class="layui-form" style="padding-top:30px;width: 500px;">\n' +
 								'            <div class="layui-form-item">\n' +
-								'                <label class="layui-form-label">门店名</label>\n' +
-								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
-								'                    <input name="shopName" id="shopName" type="text" placeholder="门店名" autocomplete="name" class="layui-input">\n' +
+								'                <label class="layui-form-label">所属门店</label>\n' +
+								'                <div class="layui-input-inline" style="width: 350px;">\n' +
+								'                   <select name="gatewayBelong" id="gatewayBelong" lay-filter="shopNum">\n' +
+								' 					</select>\n' +
 								'                </div>\n' +
 								'            </div>\n' +
 								'            <div class="layui-form-item">\n' +
-								'                <label class="layui-form-label">所属省份</label>\n' +
+								'                <label class="layui-form-label">网关IP</label>\n' +
 								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
-								'                    <input name="shopProvince" id="shopProvince" type="text" placeholder="所属省份"  autocomplete="off" class="layui-input">\n' +
+								'                    <input name="gatewayIP" id="gatewayIP" type="text" placeholder="例:192.168.0.122"  autocomplete="off" class="layui-input">\n' +
 								'                </div>\n' +
 								'            </div>\n' +
 								'            <div class="layui-form-item">\n' +
-								'                <label class="layui-form-label">所属区域</label>\n' +
+								'                <label class="layui-form-label">网关状态</label>\n' +
 								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
-								'                    <input name="shopUrban" id="shopUrban" type="text" placeholder="所属区域"  autocomplete="off" class="layui-input">\n' +
-								'                </div>\n' +
-								'            </div>\n' +
-								'            <div class="layui-form-item">\n' +
-								'                <label class="layui-form-label">详细地址</label>\n' +
-								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
-								'                    <input name="shopAddress" id="shopAddress" type="text" placeholder="详细地址"  autocomplete="off" class="layui-input">\n' +
+								'                    <input name="gatewayType" id="gatewayType" type="text" placeholder="0为未启用 1为启用"  autocomplete="off" class="layui-input">\n' +
 								'                </div>\n' +
 								'            </div>\n' +
 								'            <div class="layui-form-item">\n' +
@@ -254,6 +248,31 @@
 								'                </div>\n' +
 								'            </div>\n' +
 								'        </form>',
+						success:function () {
+							sendAxios(
+									"admin/getRole",
+									user
+							).then(res=>{
+								if(res.data.code==200){
+									var thisRole = res.data.thisRole;
+									var shops = res.data.shops;
+									$('#gatewayBelong').append(new Option(""));
+									if(thisRole == "超级管理员"){
+										$.each(shops, function(i,item) {
+											$('#gatewayBelong').append(new Option(item.shopName,item.shopNum));
+										})
+									}else{
+										$('#gatewayBelong').append(new Option(shops.shopName,shops.shopNum));
+									}
+								}else{
+									alert(res.data.msg);
+								}
+								//重新渲染Select元素
+								layui.form.render("select");
+							}).catch(res=>{
+								alert("函数执行失败！")
+							})
+						},
 						cancel: function () {
 							location.reload();
 						}
@@ -262,28 +281,40 @@
 						layer.close(layer.index);
 						location.reload();
 					});
-					document.getElementById("shopName").value=new_shop.shopName;
+
 					//加载表单
 					layui.use('form', function(){
 						var form = layui.form;
 						//渲染表单
 						layui.form.render();
+
+						//检测下拉选择事件
+						//通过lay-filter进行检测，并且获取value
+
+						form.on('select(shopNum)',function(data) {
+							if (data.value != tempShopNum)
+								new_gateway.shopNum = data.value;
+						});
+
 						form.on('submit(btn_yes)', function (data) {
-							new_shop.shopName = data.field.shopName;
-							new_shop.shopProvince = data.field.shopProvince;
-							new_shop.shopUrban = data.field.shopUrban;
-							new_shop.shopAddress = data.field.shopAddress;
-							new_shop.userName = user.userName;
-							console.log(new_shop);
+							if (data.field.gatewayIP == new_gateway.gatewayIP)
+								new_gateway.gatewayIP = null;
+							else new_gateway.gatewayIP = data.field.gatewayIP;
+							if (data.field.gatewayType == new_gateway.gatewayIP)
+								new_gateway.gatewayIP = null;
+							else new_gateway.gatewayType = data.field.gatewayType;
+							new_gateway.userName = user.userName;
+							new_gateway.shopName = null;
 							sendAxios(
-									'shop/updateShopInfo',
-									new_shop
+									'gateway/updateGateway',
+									new_gateway
 							).then(res=>{
 								alert(res.data.msg);
+								location.reload();
 							}).catch(res=>{
-								alert("函数执行失败!")
+								alert("函数执行失败!");
+								location.reload();
 							});
-							location.reload();
 						});
 					});
 				});
