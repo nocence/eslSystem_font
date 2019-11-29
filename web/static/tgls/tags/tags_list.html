@@ -12,26 +12,23 @@
 		<title>BlueToothPrice V1.0</title>
 
 		<!-- 公共样式 开始 -->
-		<link rel="stylesheet" type="text/css" href="/static/css/base.css">
-		<link rel="stylesheet" type="text/css" href="/static/css/iconfont.css">
-		<script type="text/javascript" src="/static/framework/jquery-1.11.3.min.js"></script>
-		<link rel="stylesheet" type="text/css" href="/static/layui/css/layui.css">
-		<script type="text/javascript" src="/static/layui/layui.js"></script>
+		<link rel="stylesheet" type="text/css" href="../../css/base.css">
+		<link rel="stylesheet" type="text/css" href="../../css/iconfont.css">
+		<script type="text/javascript" src="../../framework/jquery-1.11.3.min.js"></script>
+		<link rel="stylesheet" type="text/css" href="../../layui/css/layui.css">
+		<script type="text/javascript" src="../../layui/layui.js"></script>
 		<!-- 滚动条插件 -->
-		<link rel="stylesheet" type="text/css" href="/static/css/jquery.mCustomScrollbar.css">
-		<script src="/static/framework/jquery-ui-1.10.4.min.js"></script>
-		<script src="/static/framework/jquery.mousewheel.min.js"></script>
-		<script src="/static/framework/jquery.mCustomScrollbar.min.js"></script>
-		<script src="/static/framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
+		<link rel="stylesheet" type="text/css" href="../../css/jquery.mCustomScrollbar.css">
+		<script src="../../framework/jquery-ui-1.10.4.min.js"></script>
+		<script src="../../framework/jquery.mousewheel.min.js"></script>
+		<script src="../../framework/jquery.mCustomScrollbar.min.js"></script>
+		<script src="../../framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
 		<!-- 公共样式 结束 -->
 		<!--js和vue引入-->
+		<script type="text/javascript" src="../../js/jsencrypt.min.js"></script>
 		<script type="text/javascript" src="../../js/vue.js"></script>
 		<script type="text/javascript" src="../../js/axios.min.js"></script>
 		<script type="text/javascript" src="../../js/util.js"></script>
-		<!--bootstrap引入-->
-		<script type="text/javascript" src="../../js/jquery-1.11.3.js"></script>
-		<script type="text/javascript" src="../../js/bootstrap.js"></script>
-		<link rel="stylesheet" type="text/css" href="../../css/bootstrap.css">
 	</head>
 
 	<body>
@@ -41,12 +38,19 @@
 					<form class="layui-form" action="">
 						<div class="layui-form-item">
 							<div class="layui-input-inline">
-								<input type="text" v-model="fontTag.storeName" required lay-verify="required" placeholder="输入门店名称" autocomplete="off" class="layui-input">
+								<input type="text" v-model="requestParameter.shopName" required lay-verify="required" placeholder="输入门店名称" autocomplete="off" class="layui-input">
 							</div>
 							<div class="layui-input-inline">
-								<input type="text" v-model="fontTag.goodsName" required lay-verify="required" placeholder="输入商品名称" autocomplete="off" class="layui-input">
+								<input type="text" v-model="requestParameter.goodsName" required lay-verify="required" placeholder="输入商品名称" autocomplete="off" class="layui-input">
+							</div>
+							<div class="layui-input-inline">
+								<input type="text" v-model="requestParameter.ptagResolution" required lay-verify="required" placeholder="输入价签规格" autocomplete="off" class="layui-input">
+							</div>
+							<div class="layui-input-inline">
+								<input type="text" v-model="requestParameter.ptagColor" required lay-verify="required" placeholder="输入价签颜色" autocomplete="off" class="layui-input">
 							</div>
 							<button type="button" class="layui-btn" @click="query()">检索</button>
+							<button type="button" class="layui-btn" @click="reset()">重置</button>
 						</div>
 					</form>
 				</div>
@@ -57,33 +61,30 @@
 							<th>序号</th>
 							<th>价签MAC地址</th>
 							<th>所属门店</th>
-							<th>所属WiFi</th>
 							<th>商品名称</th>
-							<th>商品价格</th>
-							<th>商品规格</th>
-							<th>计量单位</th>
+							<th>当前图片</th>
+							<th>剩余电量</th>
 							<th>使用状态</th>
 							<th>操作</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr v-for="(i,index) in fontTags">
+						<tr v-for="(i,index) in priceTags">
 							<td>{{index+1}}</td>
-							<td>{{i.macAddress}}</td>
-							<td>{{i.storeName}}</td>
-							<td>{{i.wifiIp}}</td>
+							<td>{{i.ptagMac}}</td>
+							<td>{{i.shopName}}</td>
 							<td>{{i.goodsName}}</td>
-							<td>{{i.goodsPrice}}元</td>
-							<td>{{i.goodsSpecs}}</td>
-							<td>{{i.goodsUnit}}</td>
-							<td>{{i.state}}</td>
+							<td><img :src="'data:image/bmp;base64,'+i.picBase64"></td>
+							<td>{{i.ptagElectricity}}</td>
+							<td>{{i.ptagIsuse}}</td>
 							<td>
-								<button class="layui-btn layui-btn-xs" type="button" data-toggle="modal" data-target="#myModal" @click="updateFontTag(i)">修改</button>
+								<button class="layui-btn layui-btn-xs" type="button" @click="showAllInfo(i)">查看详细信息</button>
 							</td>
 						</tr>
 					</tbody>
 				</table>
 			</div>
+			<div style="text-align: center" id="paging"></div>
 
 			<!--模态框-->
 <!--			<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">-->
@@ -119,41 +120,177 @@
 		</div>
 
 		<script type="text/javascript">
+
+			//获取登录用户角色
+			var user = JSON.parse(sessionStorage.getItem("loginAdmin"));
+			//默认页数
+			var current_page = 1;
+			//默认每页容量
+			var limit = 10;
+
 			new Vue({
 				el:"#myVue",
 				data:{
-					fontTags:[],
-					fontTag:{
-						storeName:"",
-						goodsName:""
+					priceTags:[],
+					priceTag:{
+						shopName:"",
+						goodsName:"",
+						goodsPrice:"",
+						goodsSpecs:"",
+						goodsUnit:"",
+						ptagMac:"",
+						gatewayIP:"",
+						ptagElectricity:"",
+						ptagIsuse:"",
+						ptagColor:"",
+						ptagResolution:"",
+						picBase64:"",
+						picPath:""
+					},
+					requestParameter:{
+						userName:"",
+						shopName:"",
+						goodsName:"",
+						ptagColor:"",
+						ptagResolution:"",
+						pageNum:"",
+						pageSize:""
 					}
 				},
 				methods:{
 					query:function(){
-						if(this.fontTag.storeName== ""){
-							this.fontTag.storeName== null
+						this.requestParameter.userName = user.userName;
+						this.requestParameter.pageNum = current_page;
+						this.requestParameter.pageSize = limit;
+						if(this.requestParameter.shopName == ""){
+							this.requestParameter.shopName = null
 						}
-						if(this.fontTag.goodsName ==""){
-							this.fontTag.goodsName ==null
+						if(this.requestParameter.goodsName ==""){
+							this.requestParameter.goodsName = null
+						}
+						if(this.requestParameter.PTagColor ==""){
+							this.requestParameter.PTagColor = null
+						}
+						if(this.requestParameter.PTagResolution ==""){
+							this.requestParameter.PTagResolution = null
 						}
 						sendAxios(
-								"tags/showAllTags",
-								this.fontTag
+								"pricetag/getPricetagList",
+								this.requestParameter
 						).then(res=>{
 							if(res.data.code==200){
-								this.fontTags =res.data.list;
+								this.priceTags =res.data.pageInfo.list;
+								//调用分页函数
+								page(res.data.pageInfo.total,current_page,limit);
 							}else{
 								alert("查询数据失败！")
 							}
 						}).catch(res=>{
 							alert("函数执行失败！")
 						})
+					},
+					showAllInfo:function (i){
+						layui.use(['layer'],function () {
+							layer.open({
+								type:1,
+								title:"详细信息",
+								area:["280px","180px"],
+								content:'		<div style="display:flex; align-items:center; justify-content:center;">\n' +
+										' 		<table>\n' +
+										'		<tr>\n' +
+										'			<td><strong> 价签颜色：</strong></td>\n' +
+										'			<td><label id="PTagColor"></label></td>\n' +
+										'		</tr>\n' +
+										'		<tr>\n' +
+										'			<td><strong>价签尺寸：</strong></td>\n' +
+										'			<td><label id="PTagResolution"></label></td>\n' +
+										'		</tr>\n' +
+										'		<tr>\n' +
+										'			<td><strong>所属网关：</strong></td>\n' +
+										'			<td><label id="gatewayIP"></label></td>\n' +
+										'		</tr>\n' +
+										'		<tr>\n' +
+										'			<td><strong>显示商品名称：</strong></td>\n' +
+										'			<td><label id="goodsName"></label></td>\n' +
+										'		</tr>\n' +
+										'		<tr>\n' +
+										'			<td><strong>显示商品规格：</strong></td>\n' +
+										'			<td><label id="goodsSpecs"></label></td>\n' +
+										'		</tr>\n' +
+										'		<tr>\n' +
+										'			<td><strong>显示商品价格：</strong></td>\n' +
+										'			<td><label id="goodsPrice"></label></td>\n' +
+										'		</tr>\n' +
+										' 		</table>\n' +
+										// '               <p>价签颜色：<label id="PTagColor"></label></p>\n' +
+										// ' 				<p>价签尺寸：<label id="PTagResolution"></label></p>\n' +
+										// ' 				<p>所属网关：<label id="gatewayIP"></label></p>' +
+										// ' 				<p>显示商品名称：<label id="goodsName"></label></p>\n' +
+										// ' 				<p>显示商品规格：<label id="goodsSpecs"></label></p>\n' +
+										// ' 				<p>显示商品价格：<label id="goodsPrice"></label></p>\n' +
+										'       </div>',
+								success:function () {
+									document.getElementById("goodsName").innerHTML=i.goodsName;
+									document.getElementById("goodsSpecs").innerHTML=i.goodsSpecs + i.goodsUnit;
+									document.getElementById("gatewayIP").innerHTML=i.gatewayIP;
+									document.getElementById("goodsPrice").innerHTML=i.goodsPrice;
+									document.getElementById("PTagColor").innerHTML=i.ptagColor;
+									document.getElementById("PTagResolution").innerHTML=i.ptagResolution;
+								}
+							});
+						});
+					},
+					reset:function () {
+						this.requestParameter.shopName = "";
+						this.requestParameter.goodsName = "";
+						this.requestParameter.PTagColor = "";
+						this.requestParameter.PTagResolution = "";
+						this.query();
 					}
 				},
 				created:function(){
 					this.query();
 				}
 			});
+
+
+			//分页函数
+			//参数：查询总条数，当前页数，每页上限
+			function page(count,curr,limit) {
+				layui.use('laypage',function () {
+					var laypage = layui.laypage;
+					laypage.render({
+						elem:'paging',
+						count:count,
+						limit:limit,
+						curr:curr,
+						theme:'#4e66f1',
+						jump:function (obj,first) {
+							//第一次不执行防止死循环
+							if(!first){
+								curr = obj.curr;
+
+								eu.requestParameter.pageNum = curr;
+								eu.requestParameter.pageSize = limit;
+								sendAxios(
+										"tags/getAllTags",
+										eu.requestParameter
+								).then(res=>{
+									if(res.data.code==200){
+										ur.priceTags = res.data.pageInfo.list;
+									}else{
+										alert(res.data.msg);
+									}
+								}).catch(res=>{
+									alert("函数执行失败！")
+								})
+							}
+						}
+					});
+				});
+			}
+
+
 		</script>
 	</body>
 

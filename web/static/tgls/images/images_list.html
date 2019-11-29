@@ -46,6 +46,7 @@
                    autocomplete="off" class="layui-input">
           </div>
           <button type="button" class="layui-btn" @click="query()">检索</button>
+          <button type="button" class="layui-btn" @click="reset()">重置</button>
         </div>
       </form>
     </div>
@@ -141,7 +142,12 @@
         }).catch(res=>{
           alert("函数执行失败！")
         })
-      }
+      },
+        reset:function () {
+          this.goods.goodsName = "";
+          this.goods.goodsSpecs = "";
+          this.query();
+        }
     },
     created:function(){
       this.query();
