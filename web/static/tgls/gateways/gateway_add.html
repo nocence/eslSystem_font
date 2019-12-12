@@ -49,9 +49,9 @@
 						</div>
 					</div>
 					<div class="layui-form-item">
-						<label class="layui-form-label">设置IP</label>
+						<label class="layui-form-label">设置网关mac地址</label>
 						<div class="layui-input-inline shortInput">
-							<input type="text" v-model="wifis.gatewayIP" required lay-verify="required|identity" placeholder="例:192.168.0.122"autocomplete="off" class="layui-input">
+							<input type="text" v-model="wifis.gatewayMac" required lay-verify="required|identity" placeholder="例:112233445566"autocomplete="off" class="layui-input">
 						</div>
 					</div>
 					<!--<div class="layui-form-item">
@@ -115,7 +115,7 @@
 				data:{
 					wifis:{
                         gatewayShopNum:"",
-						gatewayIP:""
+						gatewayMac:""
                     }
 				},
 				methods:{

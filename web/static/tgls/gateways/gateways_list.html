@@ -51,7 +51,7 @@
 						<tr>
 							<th>序号</th>
 							<th>门店名称</th>
-							<th>网关IP</th>
+							<th>网关MAC地址</th>
 							<th>使用状态</th>
 							<th>操作</th>
 						</tr>
@@ -60,7 +60,7 @@
 						<tr v-for="(i,index) in gateways">
 							<td>{{index+1}}</td>
 							<td>{{i.shopName}}</td>
-							<td>{{i.gatewayIP}}</td>
+							<td>{{i.gatewayMac}}</td>
 							<td>{{i.gatewayType}}</td>
 							<td>
 								<button class="layui-btn layui-btn-xs" type="button" @click="updateGateway(i)">修改</button>
@@ -87,7 +87,7 @@
 					gateways:[],
 					gateway:{
 						userName:"",
-						gatewayIP:"",
+						gatewayMac:"",
 						gatewayType:"",
 						shopName:"",
 						pageNum:"",
@@ -118,7 +118,7 @@
 					},
 					reset:function () {
 						this.gateway.gatewayShopName = "";
-						this.gateway.gatewayIP = "";
+						this.gateway.gatewayMac = "";
 						this.query();
 					},
 					updateGateway:function (new_gateway) {
@@ -222,9 +222,9 @@
 								'                </div>\n' +
 								'            </div>\n' +
 								'            <div class="layui-form-item">\n' +
-								'                <label class="layui-form-label">网关IP</label>\n' +
+								'                <label class="layui-form-label">网关MAC地址</label>\n' +
 								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
-								'                    <input name="gatewayIP" id="gatewayIP" type="text" placeholder="例:192.168.0.122"  autocomplete="off" class="layui-input">\n' +
+								'                    <input name="gatewayMac" id="gatewayMac" type="text" placeholder="例:112233445566"  autocomplete="off" class="layui-input">\n' +
 								'                </div>\n' +
 								'            </div>\n' +
 								'            <div class="layui-form-item">\n' +
@@ -290,11 +290,11 @@
 						});
 
 						form.on('submit(btn_yes)', function (data) {
-							if (data.field.gatewayIP == new_gateway.gatewayIP)
-								new_gateway.gatewayIP = null;
-							else new_gateway.gatewayIP = data.field.gatewayIP;
-							if (data.field.gatewayType == new_gateway.gatewayIP)
-								new_gateway.gatewayIP = null;
+							if (data.field.gatewayMac == new_gateway.gatewayMac)
+								new_gateway.gatewayMac = null;
+							else new_gateway.gatewayMac = data.field.gatewayMac;
+							if (data.field.gatewayType == new_gateway.gatewayMac)
+								new_gateway.gatewayMac = null;
 							else new_gateway.gatewayType = data.field.gatewayType;
 							new_gateway.userName = user.userName;
 							new_gateway.shopName = null;
