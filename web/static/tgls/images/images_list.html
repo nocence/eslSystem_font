@@ -61,28 +61,22 @@
         <th style="text-align:center">商品规格</th>
         <th style="text-align:center">图片名称</th>
         <th style="text-align:center">图片预览</th>
-        <th style="text-align:center">操作</th>
       </tr>
       </thead>
       <tbody>
       <tr v-for="(i,index) in pictrues">
-        <td><input type="checkbox" :checked="i.choose"></td>
+        <td><input type="checkbox" v-on:click="selectImg(i)"></td>
         <td>{{index+1}}</td>
         <td>{{i.goodsName}}</td>
         <td>{{i.goodsId}}</td>
         <td>{{i.goodsSpecs}}{{i.goodsUnit}}</td>
         <td>{{i.picName}}</td>
         <td><img :src="'data:image/bmp;base64,'+i.picBase64"></td>
-        <td>
-          <button class="layui-btn layui-btn-xs" type="button" @click="sendImg(image)">发送图片
-          </button>
-          <button class="layui-btn layui-btn-xs" type="button" @click="deleteImg(image)">删除图片
-          </button>
-        </td>
       </tr>
       </tbody>
     </table>
-    <button class="layui-btn" type="button" @click="">批量发送</button>
+    <button class="layui-btn layui-btn-xs" type="button" @click="deleteImg()">删除图片
+    </button>
   </div>
   <div style="text-align: center" id="paging"></div>
 </div>
@@ -109,14 +103,15 @@
         goodsId:"",
         goodsSpecs:"",
         goodsUnit:"",
-        choose:""
+        choose:false
       },
       goods:{
         goodsName:"",
         goodsSpecs:"",
         pageNum:"",
-        pageSize:"",
-      }
+        pageSize:""
+      },
+      selectImgs:[]
     },
     methods:{
       query:function(){
@@ -143,11 +138,51 @@
           alert("函数执行失败！")
         })
       },
-        reset:function () {
-          this.goods.goodsName = "";
-          this.goods.goodsSpecs = "";
-          this.query();
-        }
+      reset:function () {
+        this.goods.goodsName = "";
+        this.goods.goodsSpecs = "";
+        this.query();
+      },
+      selectImg:function (i) {
+        i.choose = !i.choose;
+      },
+      deleteImg:function () {
+        layui.use(['layer'],function () {
+          layer.open({
+            type:1,
+            title:"请确认",
+            area:["280px","210px"],
+            content:'		<div align="center">\n' +
+                    '               <h2 style="padding-top:30px;padding-bottom:30px;">是否确认删除该网关</h2>\n' +
+                    ' 			    <button class="layui-btn layui-btn-sm" type="button" id="btn_yes">确认</button>\n' +
+                    ' 			    <button class="layui-btn layui-btn-sm" type="button" id="btn_no">取消</button>\n' +
+                    '           </div>'
+          });
+        });
+        $('body').on('click','#btn_yes',function () {
+          for (i of this.pictrues){
+            if (i.choose) {
+              this.selectImgs.push(i);
+            }
+          }
+          sendAxios(
+                  "pictrue/deletePictrues",
+                  JSON.stringify(this.selectImgs)
+          ).then(res=>{
+            if(res.data.code==200){
+              alert(res.data.message);
+            }else {
+              alert(res.data.message);
+            }
+          }).catch(res=>{
+            alert("函数执行失败");
+          })
+        });
+        $('body').on('click','#btn_no',function () {
+          layer.close(layer.index);
+          location.reload();
+        });
+      }
     },
     created:function(){
       this.query();

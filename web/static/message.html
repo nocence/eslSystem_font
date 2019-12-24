@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,Chrome=1">
+        <!-- Google Chrome Frame也可以让IE用上Chrome的引擎: -->
+        <meta name="renderer" content="webkit">
+        <!--国产浏览器高速模式-->
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="author" content="穷在闹市" />
+        <!-- 作者 -->
+        <meta name="revised" content="穷在闹市.v3, 2019/05/01" />
+        <!-- 定义页面的最新版本 -->
+        <meta name="description" content="网站简介" />
+        <!-- 网站简介 -->
+        <meta name="keywords" content="搜索关键字，以半角英文逗号隔开" />
+        <title>穷在闹市出品</title>
+
+        <!-- 公共样式 开始 -->
+        <link rel="stylesheet" type="text/css" href="css/base.css">
+        <link rel="stylesheet" type="text/css" href="css/iconfont.css">
+        <script type="text/javascript" src="framework/jquery-1.11.3.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="layui/css/layui.css">
+        <script type="text/javascript" src="layui/layui.js"></script>
+        <!-- 滚动条插件 -->
+        <link rel="stylesheet" type="text/css" href="css/jquery.mCustomScrollbar.css">
+        <script src="framework/jquery-ui-1.10.4.min.js"></script>
+        <script src="framework/jquery.mousewheel.min.js"></script>
+        <script src="framework/jquery.mCustomScrollbar.min.js"></script>
+        <script src="framework/cframe.js"></script><!-- 仅供所有子页面使用 -->
+        <!-- 公共样式 结束 -->
+        <!--js和vue引入-->
+        <script type="text/javascript" src="js/jsencrypt.min.js"></script>
+        <script type="text/javascript" src="js/vue.js"></script>
+        <script type="text/javascript" src="js/axios.min.js"></script>
+        <script type="text/javascript" src="js/util.js"></script>
+        <style>
+            .layui-table img {
+                max-width: none;
+            }
+            .layui-laydate-content > .layui-laydate-list {
+                padding-bottom: 0px;
+                overflow: hidden;
+            }
+            .layui-laydate-content > .layui-laydate-list > li {
+                width: 50%
+            }
+        </style>
+
+    </head>
+
+    <body>
+        <div id="myVue">
+            <div class="cBody">
+                <div class="console">
+                    <form class="layui-form" >
+                        <div class="layui-form-item">
+                            <div class="layui-input-inline">
+                                <input type="text" v-model="requestParameter.userName" required lay-verify="required" placeholder="输入发送者" autocomplete="off" class="layui-input">
+                            </div>
+                            <label class="layui-form-label">是否已读</label>
+                            <div class="layui-input-inline">
+                                <select lay-filter="isReadFlag">
+                                    <option value=null>不限</option>
+                                    <option value="1">已读</option>
+                                    <option value="0">未读</option>
+                                </select>
+                            </div>
+                            <label class="layui-form-label">消息状态</label>
+                            <div class="layui-input-inline">
+                                <select lay-filter="isSuccessFlag">
+                                    <option value=null>不限</option>
+                                    <option value="0">待处理</option>
+                                    <option value="1">处理成功</option>
+                                    <option value="2">处理失败</option>
+                                </select>
+                            </div>
+                            <label class="layui-form-label">时间范围</label>
+                            <div class="layui-input-inline">
+                                <input type="text" class="layui-input" name="dateInput" id="dateInput">
+                            </div>
+                            <div class="layui-input-inline">
+                                <input type="text" class="layui-input" name="timeInput" id="timeInput" placeholder=" - ">
+                            </div>
+                            <button type="button" class="layui-btn" @click="query()">检索</button>
+                            <button type="button" class="layui-btn" @click="reset()">重置</button>
+                        </div>
+                    </form>
+
+                </div>
+
+                <table class="layui-table">
+                    <thead>
+                    <tr>
+                        <th>消息指令</th>
+                        <th>发送者</th>
+                        <th>接收商店</th>
+                        <th>接收网关</th>
+                        <th>接收价签</th>
+                        <th>操作商品名</th>
+                        <th>规格</th>
+                        <th>发送时间</th>
+                        <th>处理状态</th>
+                        <th>是否已读</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="(i,index) in msgs">
+                        <td>{{i.esCmdCode}}</td>
+                        <td>{{i.userName}}</td>
+                        <td>{{i.shopName}}</td>
+                        <td>{{i.gatewayMac}}</td>
+                        <td>{{i.etagMac}}</td>
+                        <td>{{i.goodsName}}</td>
+                        <td>{{i.goodsSpecs}}</td>
+                        <td>{{i.esTime}}</td>
+                        <td>{{i.esIsSuccess}}</td>
+                        <td>{{i.esIsRead}}</td>
+                        <td>
+                            <button v-if="i.esIsRead === 0" class="layui-btn layui-btn-xs" type="button" @click="checkRead(i)">标记为已读</button>
+                            <label v-else class="layui-form-label">无</label>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+                <button class="layui-btn" type="button" @click="allCheckRead()">全部标记为已读</button>
+            </div>
+            <div style="text-align: center" id="paging"></div>
+        </div>
+
+    <script>
+        //获取登录用户角色
+        var user = JSON.parse(sessionStorage.getItem("loginAdmin"));
+        //默认页数
+        var current_page = 1;
+        //默认每页容量
+        var limit = 10;
+
+        var eu = new Vue({
+            el:"#myVue",
+            data:{
+                msgs:[],
+                msg:{
+                    userName:"",
+                    shopName:"",
+                    esCmdCode:"",
+                    gatewayMac:"",
+                    etagMac:"",
+                    goodsName:"",
+                    goodsSpecs:"",
+                    esTime:"",
+                    esIsRead:"",
+                    esIsSuccess:""
+                },
+                requestParameter:{
+                    userName:"",
+                    esIsRead:"",
+                    esIsSuccess:"",
+                    startTime:null,
+                    endTime:null,
+                    pageNum:"",
+                    pageSize:""
+                },
+                updateParameter:[]
+
+            },
+            methods:{
+                query:function () {
+                    this.requestParameter.userName = user.userName;
+                    this.requestParameter.pageNum = current_page;
+                    this.requestParameter.pageSize = limit;
+                    sendAxios(
+                        "message/getAllMessage",
+                        this.requestParameter
+                    ).then(res=>{
+                        if(res.data.code==200){
+                            this.msgs =res.data.pageInfo.list;
+                            //调用分页函数
+                            page(res.data.pageInfo.total,current_page,limit);
+                        }else{
+                            alert("查询数据失败！")
+                        }
+                    }).catch(res=>{
+                        alert("函数执行失败！")
+                    })
+                },
+                //单个消息已读更新函数
+                checkRead:function (new_msg) {
+                    this.updateParameter.push(new_msg);
+                    sendAxios(
+                        "message/updateIsRead",
+                        JSON.stringify(this.updateParameter)
+                    ).then(res=>{
+                        if(res.data.code==200){
+                            alert(res.data.message);
+                        }else {
+                            alert(res.data.message);
+                        }
+                    }).catch(res=>{
+                        alert("函数执行失败");
+                    })
+                    this.updateParameter = null;
+                },
+                //全部消息已读更新函数
+                allCheckRead:function () {
+                    for (i of this.msgs){
+                        if (i.isRead == "0"){
+                            this.updateParameter.push(i);
+                        }
+                    }
+                    sendAxios(
+                        "message/updateIsRead",
+                        JSON.stringify(this.updateParameter)
+                    ).then(res=>{
+                        if(res.data.code==200){
+                            alert(res.data.message);
+                        }else {
+                            alert(res.data.message);
+                        }
+                    }).catch(res=>{
+                        alert("函数执行失败");
+                    })
+                    this.updateParameter = null;
+                }
+            },
+            created:function(){
+                this.query();
+            }
+        });
+
+
+        //分页函数
+        //参数：查询总条数，当前页数，每页上限
+        function page(count,curr,limit) {
+            layui.use('laypage',function () {
+                var laypage = layui.laypage;
+                laypage.render({
+                    elem:'paging',
+                    count:count,
+                    limit:limit,
+                    curr:curr,
+                    theme:'#4e66f1',
+                    jump:function (obj,first) {
+                        //第一次不执行防止死循环
+                        if(!first){
+                            curr = obj.curr;
+                            eu.requestParameter.pageNum = curr;
+                            eu.requestParameter.pageSize = limit;
+                            sendAxios(
+                                "message/getAllMessage",
+                                eu.requestParameter
+                            ).then(res=>{
+                                if(res.data.code==200){
+                                    eu.msgs = res.data.pageInfo.list;
+                                }else{
+                                    alert(res.data.msg);
+                                }
+                            }).catch(res=>{
+                                alert("函数执行失败！")
+                            })
+                        }
+                    }
+                });
+            });
+        }
+        //时间选项卡
+        layui.use(['element', 'form','laydate'], function () {
+            var form = layui.form;
+            form.on('select(isReadFlag)',function (data) {
+                eu.requestParameter.isRead = data.value;
+            });
+            form.on('select(isSuccessFlag)',function (data) {
+                eu.requestParameter.isSuccess = data.value;
+            });
+
+            var laydate = layui.laydate;
+
+            //选择开始时间
+            laydate.render({
+                elem:'#dateInput',
+                type:'datetime',
+                format:'yyyy-MM-dd H:mm',
+                max:Date.now(),
+                done:function (value, date) {
+                    eu.requestParameter.startTime = date;
+                }
+            });
+            //时间范围
+            laydate.render({
+                elem: '#timeInput'
+                , type: 'datetime'
+                , format: 'yyyy-MM-dd H:mm'
+                , done:function (value, date) {
+                    eu.requestParameter.endTime = date;
+                }
+            });
+
+        });
+    </script>
+
+    </body>
+</html>
