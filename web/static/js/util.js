@@ -65,8 +65,6 @@ function sendAxios(myUrl,myData){
     var mykey = "zssb" +"|"+ nowtime;
     var m = encrypt.encrypt(mykey);
     //向数据中添加签名
-    console.log(myData)
-    // myData.passSign = m;
     let token = sessionStorage.getItem("token")
     if (token !=null && token != "")this.Authorization = token;
     return new Promise((resolve, reject) => {
