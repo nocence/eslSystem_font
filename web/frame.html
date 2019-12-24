@@ -250,7 +250,7 @@
 			}
 
 			//消息查询定时器
-			var msgQueryInit=self.setInterval("msgQuery()",1000);
+			var msgQueryInit=self.setInterval("msgQuery()",60000);
 			function msgQuery()
 			{
 				//查询是否未读请求
@@ -260,7 +260,7 @@
 				).then(res=>{
 					if (res.data.code == 200 && res.data.count != 0){
 						document.getElementById("messagePoint").style.visibility="visible";
-					}
+					}else document.getElementById("messagePoint").style.visibility="hidden";
 				})
 			}
         </script>

@@ -142,7 +142,7 @@
             el:"#myVue",
             data:{
                 msgs:[],
-                msg:{
+                mymsg:{
                     userName:"",
                     shopName:"",
                     esCmdCode:"",
@@ -194,9 +194,9 @@
                         JSON.stringify(this.updateParameter)
                     ).then(res=>{
                         if(res.data.code==200){
-                            alert(res.data.message);
+                            alert(res.data.msg);
                         }else {
-                            alert(res.data.message);
+                            alert(res.data.msg);
                         }
                     }).catch(res=>{
                         alert("函数执行失败");
@@ -215,9 +215,9 @@
                         JSON.stringify(this.updateParameter)
                     ).then(res=>{
                         if(res.data.code==200){
-                            alert(res.data.message);
+                            alert(res.data.msg);
                         }else {
-                            alert(res.data.message);
+                            alert(res.data.msg);
                         }
                     }).catch(res=>{
                         alert("函数执行失败");
