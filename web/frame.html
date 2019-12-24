@@ -65,6 +65,10 @@
 					<div class="topMenu">
 						<ul>
 							<li><a href="javascript:void(0)"><i class="iconfont icon-yonghu1"></i>欢迎您，管理员：{{user.userName}}</a></li>
+							<li><a href="javascript:void(0)" onclick="messageOnClick('static/message.html')">
+								<i class="layui-icon layui-icon-notice"> 消息</i>
+								<span id="messagePoint" class="layui-badge-dot" style="visibility: hidden; position: relative; top: -3px; left: -3px;"></span>
+							</a></li>
 							<li><a id="reset_password" href="javascript:void(0)"><i class="iconfont icon-xiugaimima"></i>修改密码</a></li>
 							<li><a href="javascript:void(0)" @click="logout()"><i class="iconfont icon-084tuichu"></i>注销</a></li>
 						</ul>
@@ -85,7 +89,10 @@
 			</div>
 		</div>
         <script type="text/javascript">
+			var user=JSON.parse(sessionStorage.getItem("loginAdmin"));
 
+
+			//依据当前用户角色查询可使用功能
             layui.use('element', function(){
             	var form = layui.form;
             	var layer = layui.layer;
@@ -103,7 +110,6 @@
                         element.tabChange('demo1', id);
                     }
                 });
-                var user=JSON.parse(sessionStorage.getItem("loginAdmin"));
                 sendAxios(
                     "user/getInitMenus",
                     user
@@ -234,9 +240,29 @@
                 created:function(){
                     this.user=JSON.parse(sessionStorage.getItem("loginAdmin"));
                 },
-            });
+            })
 
+			//消息管理页面弹出
+			function messageOnClick(url) {
+				//处理frameMain url地址
+				$("#mainIframe").attr("src",url);
+				$("#frameMainTitle span").html('<i class="iconfont icon-xianshiqi"></i>消息管理');
+			}
 
+			//消息查询定时器
+			var msgQueryInit=self.setInterval("msgQuery()",1000);
+			function msgQuery()
+			{
+				//查询是否未读请求
+				sendAxios(
+						"message/getIsReadCount",
+						user
+				).then(res=>{
+					if (res.data.code == 200 && res.data.count != 0){
+						document.getElementById("messagePoint").style.visibility="visible";
+					}
+				})
+			}
         </script>
 	</body>
 </html>
