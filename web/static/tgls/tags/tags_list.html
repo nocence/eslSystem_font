@@ -207,7 +207,7 @@
 						goodsSpecs:"",
 						goodsUnit:"",
 						ptagMac:"",
-						gatewayIP:"",
+						gatewayMac:"",
 						ptagElectricity:"",
 						ptagIsuse:"",
 						ptagColor:"",
@@ -296,7 +296,7 @@
 										'		</tr>\n' +
 										'		<tr>\n' +
 										'			<td><strong>所属网关：</strong></td>\n' +
-										'			<td><label id="gatewayIP"></label></td>\n' +
+										'			<td><label id="gatewayMac"></label></td>\n' +
 										'		</tr>\n' +
 										'		<tr>\n' +
 										'			<td><strong>显示商品名称：</strong></td>\n' +
@@ -321,7 +321,7 @@
 								success:function () {
 									document.getElementById("goodsName").innerHTML=i.goodsName;
 									document.getElementById("goodsSpecs").innerHTML=i.goodsSpecs + i.goodsUnit;
-									document.getElementById("gatewayIP").innerHTML=i.gatewayIP;
+									document.getElementById("gatewayMac").innerHTML=i.gatewayMac;
 									document.getElementById("goodsPrice").innerHTML=i.goodsPrice;
 									document.getElementById("PTagColor").innerHTML=i.ptagColor;
 									document.getElementById("PTagResolution").innerHTML=i.ptagResolution;
