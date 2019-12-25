@@ -88,7 +88,7 @@
 						</tr>
 					</tbody>
 				</table>
-				<button class="btn btn-primary btn-lg" type="button" data-toggle="modal" data-target="#sendImg">发送图片</button>
+				<button @click="queryForImg();" class="btn btn-primary btn-lg" type="button" data-toggle="modal" data-target="#sendImg">发送图片</button>
 
 			</div>
 			<div style="text-align: center" id="paging"></div>
@@ -225,6 +225,15 @@
 						pageNum:"",
 						pageSize:""
 					},
+					requestParameter1:{
+						userName:"",
+						shopName:"",
+						goodsName:"",
+						PTagColor:"",
+						PTagResolution:"",
+						pageNum:"",
+						pageSize:""
+					},
                     selectTags:[],
 					pictrues:[],
 					pictrue:{
@@ -340,47 +349,61 @@
 						val.choose = !val.choose;
 					},
 					sendImg:function (selectImg) {
-						var new_tag = [];
-						for (item of this.priceTags){
-							if(item.choose){
-								item.picPath = selectImg.picPath;
-								this.selectTags.push(item);
-							}
+						for (item of this.selectTags){
+							item.goodsName = selectImg.goodsName;
+							item.goodsSpecs = selectImg.goodsSpecs;
+							item.goodsUnit = selectImg.goodsUnit;
+							item.picPath = selectImg.picPath;
 						}
-
-                        // console.log(this.sendData.selectTags[0])
 						sendAxios(
 								"pricetag/sendImgToTag",
 								JSON.stringify(this.selectTags)
 						).then(res=>{
 							if(res.data.code==200){
-								alert(res.data.message);
+								alert(res.data.msg);
 							}else {
-								alert(res.data.message);
+								alert(res.data.msg);
 							}
 						}).catch(res=>{
 							alert("函数执行失败");
 						})
 					},
 					queryForImg:function () {
-						this.goods.pageNum = currentPageImg;
-						this.goods.pageSize = limit;
-						if(this.goods.goodsName == ""){
-							this.goods.goodsName = null
+						for (item of this.priceTags){
+							if(item.choose){
+								this.selectTags.push(item);
+							}
 						}
-						if(this.goods.goodsSpecs == ""){
-							this.goods.goodsSpecs = null
+						this.requestParameter1.userName = user.userName;
+						this.requestParameter1.pageNum = current_page;
+						this.requestParameter1.pageSize = limit;
+						this.requestParameter1.shopName = null;
+						this.requestParameter1.goodsName = null;
+						console.log(this.selectTags)
+						var colorTemp = this.selectTags[0].ptagColor;
+						var resolutionTemp = this.selectTags[0].ptagResolution;
+						for (item of this.selectTags){
+							if (item.ptagResolution != resolutionTemp || item.ptagColor != colorTemp){
+								alert("请选择统一规格的价签");
+								this.requestParameter1 = null;
+								this.selectTags = null;
+								return;
+							}
 						}
+						this.requestParameter1.PTagResolution = resolutionTemp;
+						this.requestParameter1.PTagColor = colorTemp;
 						sendAxios(
-								"pictrue/getAllPictrues",
-								this.goods
+								"pricetag/getImgForSend",
+								this.requestParameter1
 						).then(res=>{
 							if(res.data.code==200){
 								this.pictrues =res.data.pageInfo.list;
 								//调用分页函数
 								pageImg(res.data.pageInfo.total,currentPageImg,limit);
 							}else{
-								alert(res.data.message);
+								alert(res.data.msg);
+								this.selectTags = null;
+								location.reload();
 							}
 						}).catch(res=>{
 							alert("函数执行失败！")
@@ -394,7 +417,6 @@
 				},
 				created:function(){
 					this.query();
-					this.queryForImg();
 				}
 			});
 
@@ -449,11 +471,11 @@
 							if(!first){
 								curr = obj.curr;
 
-								eu.pictrue.pageNum = curr;
-								eu.pictrue.pageSize = limit;
+								eu.requestParameter1.pageNum = curr;
+								eu.requestParameter1.pageSize = limit;
 								sendAxios(
-										"pictrue/getAllPictrues",
-										eu.pictrue
+										"pricetag/getImgForSend",
+										eu.requestParameter1
 								).then(res=>{
 									if(res.data.code==200){
 										ur.pictrues = res.data.pageInfo.list;
