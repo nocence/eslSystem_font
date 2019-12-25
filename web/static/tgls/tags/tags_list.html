@@ -47,10 +47,10 @@
 								<input type="text" v-model="requestParameter.goodsName" required lay-verify="required" placeholder="输入商品名称" autocomplete="off" class="layui-input">
 							</div>
 							<div class="layui-input-inline">
-								<input type="text" v-model="requestParameter.PTagResolution" required lay-verify="required" placeholder="输入价签规格" autocomplete="off" class="layui-input">
+								<input type="text" v-model="requestParameter.ptagResolution" required lay-verify="required" placeholder="输入价签规格" autocomplete="off" class="layui-input">
 							</div>
 							<div class="layui-input-inline">
-								<input type="text" v-model="requestParameter.PTagColor" required lay-verify="required" placeholder="输入价签颜色" autocomplete="off" class="layui-input">
+								<input type="text" v-model="requestParameter.ptagColor" required lay-verify="required" placeholder="输入价签颜色" autocomplete="off" class="layui-input">
 							</div>
 							<button type="button" class="layui-btn" @click="query()">检索</button>
 							<button type="button" class="layui-btn" @click="reset()">重置</button>
@@ -107,11 +107,11 @@
 								<form class="layui-form" action="">
 									<div class="layui-form-item">
 										<div class="layui-input-inline">
-											<input type="text" v-model="pictrue.goodsName" required lay-verify="required" placeholder="输入商品名称"
+											<input type="text" v-model="requestParameter1.goodsName" required lay-verify="required" placeholder="输入商品名称"
 												   autocomplete="off" class="layui-input">
 										</div>
 										<div class="layui-input-inline">
-											<input type="text" v-model="pictrue.goodsSpecs" required lay-verify="required" placeholder="输入商品规格"
+											<input type="text" v-model="requestParameter1.goodsSpecs" required lay-verify="required" placeholder="输入商品规格"
 												   autocomplete="off" class="layui-input">
 										</div>
 										<button type="button" class="layui-btn" @click="queryForImg()">检索</button>
@@ -220,8 +220,8 @@
 						userName:"",
 						shopName:"",
 						goodsName:"",
-						PTagColor:"",
-						PTagResolution:"",
+						ptagColor:"",
+						ptagResolution:"",
 						pageNum:"",
 						pageSize:""
 					},
@@ -229,8 +229,9 @@
 						userName:"",
 						shopName:"",
 						goodsName:"",
-						PTagColor:"",
-						PTagResolution:"",
+						goodsSpecs:"",
+						ptagColor:"",
+						ptagResolution:"",
 						pageNum:"",
 						pageSize:""
 					},
@@ -266,11 +267,11 @@
 						if(this.requestParameter.goodsName ==""){
 							this.requestParameter.goodsName = null
 						}
-						if(this.requestParameter.PTagColor ==""){
-							this.requestParameter.PTagColor = null
+						if(this.requestParameter.ptagColor ==""){
+							this.requestParameter.ptagColor = null
 						}
-						if(this.requestParameter.PTagResolution ==""){
-							this.requestParameter.PTagResolution = null
+						if(this.requestParameter.ptagResolution ==""){
+							this.requestParameter.ptagResolution = null
 						}
 						sendAxios(
 								"pricetag/getPricetagList",
@@ -297,11 +298,11 @@
 										' 		<table>\n' +
 										'		<tr>\n' +
 										'			<td><strong> 价签颜色：</strong></td>\n' +
-										'			<td><label id="PTagColor"></label></td>\n' +
+										'			<td><label id="ptagColor"></label></td>\n' +
 										'		</tr>\n' +
 										'		<tr>\n' +
 										'			<td><strong>价签尺寸：</strong></td>\n' +
-										'			<td><label id="PTagResolution"></label></td>\n' +
+										'			<td><label id="ptagResolution"></label></td>\n' +
 										'		</tr>\n' +
 										'		<tr>\n' +
 										'			<td><strong>所属网关：</strong></td>\n' +
@@ -320,8 +321,8 @@
 										'			<td><label id="goodsPrice"></label></td>\n' +
 										'		</tr>\n' +
 										' 		</table>\n' +
-										// '               <p>价签颜色：<label id="PTagColor"></label></p>\n' +
-										// ' 				<p>价签尺寸：<label id="PTagResolution"></label></p>\n' +
+										// '               <p>价签颜色：<label id="ptagColor"></label></p>\n' +
+										// ' 				<p>价签尺寸：<label id="ptagResolution"></label></p>\n' +
 										// ' 				<p>所属网关：<label id="gatewayMac"></label></p>' +
 										// ' 				<p>显示商品名称：<label id="goodsName"></label></p>\n' +
 										// ' 				<p>显示商品规格：<label id="goodsSpecs"></label></p>\n' +
@@ -332,8 +333,8 @@
 									document.getElementById("goodsSpecs").innerHTML=i.goodsSpecs + i.goodsUnit;
 									document.getElementById("gatewayMac").innerHTML=i.gatewayMac;
 									document.getElementById("goodsPrice").innerHTML=i.goodsPrice;
-									document.getElementById("PTagColor").innerHTML=i.ptagColor;
-									document.getElementById("PTagResolution").innerHTML=i.ptagResolution;
+									document.getElementById("ptagColor").innerHTML=i.ptagColor;
+									document.getElementById("ptagResolution").innerHTML=i.ptagResolution;
 								}
 							});
 						});
@@ -341,8 +342,8 @@
 					reset:function () {
 						this.requestParameter.shopName = "";
 						this.requestParameter.goodsName = "";
-						this.requestParameter.PTagColor = "";
-						this.requestParameter.PTagResolution = "";
+						this.requestParameter.ptagColor = "";
+						this.requestParameter.ptagResolution = "";
 						this.query();
 					},
 					handleSelectionChange:function (val) {
@@ -390,8 +391,8 @@
 								return;
 							}
 						}
-						this.requestParameter1.PTagResolution = resolutionTemp;
-						this.requestParameter1.PTagColor = colorTemp;
+						this.requestParameter1.ptagResolution = resolutionTemp;
+						this.requestParameter1.ptagColor = colorTemp;
 						sendAxios(
 								"pricetag/getImgForSend",
 								this.requestParameter1
@@ -410,9 +411,9 @@
 						})
 					},
 					resetForImg:function () {
-						this.goods.goodsName = "";
-						this.goods.goodsSpecs = "";
-						this.query();
+						this.requestParameter1.goodsName = "";
+						this.requestParameter1.goodsSpecs = "";
+						this.queryForImg();
 					}
 				},
 				created:function(){
@@ -470,7 +471,6 @@
 							//第一次不执行防止死循环
 							if(!first){
 								curr = obj.curr;
-
 								eu.requestParameter1.pageNum = curr;
 								eu.requestParameter1.pageSize = limit;
 								sendAxios(
