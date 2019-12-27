@@ -211,7 +211,7 @@
                 //全部消息已读更新函数
                 allCheckRead:function () {
                     for (i of this.msgs){
-                        if (i.isRead == "0"){
+                        if (i.esIsRead == 0){
                             this.updateParameter.push(i);
                         }
                     }
