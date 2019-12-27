@@ -111,9 +111,11 @@
 								page(res.data.pageInfo.total,current_page,limit);
 							}else{
 								alert(res.data.message);
+								location.reload();
 							}
 						}).catch(res=>{
-							alert("函数执行失败！")
+							alert("函数执行失败！");
+							location.reload();
 						})
 					},
 					reset:function () {
@@ -160,9 +162,11 @@
 										ur.gateways = res.data.pageInfo.list;
 									}else{
 										alert(res.data.msg);
+										location.reload();
 									}
 								}).catch(res=>{
-									alert("函数执行失败！")
+									alert("函数执行失败！");
+									location.reload();
 								})
 							}
 						}
@@ -259,11 +263,13 @@
 									}
 								}else{
 									alert(res.data.msg);
+									location.reload();
 								}
 								//重新渲染Select元素
 								layui.form.render("select");
 							}).catch(res=>{
-								alert("函数执行失败！")
+								alert("函数执行失败！");
+								location.reload();
 							})
 						},
 						cancel: function () {

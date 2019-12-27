@@ -145,9 +145,11 @@
 								page(res.data.pageInfo.total,current_page,limit);
 							}else{
 								alert(res.data);
+                                location.reload();
 							}
 						}).catch(res=>{
 							alert(res.data.message);
+                            location.reload();
 						});
 						//查询完后重置user实体
 						user = JSON.parse(sessionStorage.getItem("loginAdmin"));
@@ -197,9 +199,11 @@
 										ur.goodss = res.data.pageInfo.list;
 									}else{
 										alert(res.data.msg);
+                                        location.reload();
 									}
 								}).catch(res=>{
-									alert("函数执行失败！")
+									alert("函数执行失败！");
+                                    location.reload();
 								})
 
 							}

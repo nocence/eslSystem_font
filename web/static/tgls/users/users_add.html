@@ -117,12 +117,15 @@
                 ).then(res=>{
                     if(res.data.code==200){
                         alert(res.data.msg);
+                        location.reload();
                     }else{
                         alert(res.data.msg);
+                        location.reload();
                     }
                     location.reload();
                 }).catch(res=>{
-                    alert("函数执行失败！")
+                    alert("函数执行失败！");
+                    location.reload();
                 })
             }
         },
@@ -172,11 +175,13 @@
                 }
             }else{
                 alert(res.data.msg);
+                location.reload();
             }
             //重新渲染Select元素
             layui.form.render("select");
         }).catch(res=>{
-            alert("函数执行失败！")
+            alert("函数执行失败！");
+            location.reload();
         })
 
     })

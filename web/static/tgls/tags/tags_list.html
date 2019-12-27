@@ -363,11 +363,14 @@
 						).then(res=>{
 							if(res.data.code==200){
 								alert(res.data.msg);
+								location.reload();
 							}else {
 								alert(res.data.msg);
+								location.reload();
 							}
 						}).catch(res=>{
 							alert("函数执行失败");
+							location.reload();
 						})
 					},
 					queryForImg:function () {
@@ -387,6 +390,7 @@
 						for (item of this.selectTags){
 							if (item.ptagResolution != resolutionTemp || item.ptagColor != colorTemp){
 								alert("请选择统一规格的价签");
+								location.reload();
 								this.requestParameter1 = null;
 								this.selectTags = null;
 								return;
@@ -408,7 +412,8 @@
 								location.reload();
 							}
 						}).catch(res=>{
-							alert("函数执行失败！")
+							alert("函数执行失败！");
+							location.reload();
 						})
 					},
 					resetForImg:function () {
@@ -449,9 +454,11 @@
 										ur.priceTags = res.data.pageInfo.list;
 									}else{
 										alert(res.data.msg);
+										location.reload();
 									}
 								}).catch(res=>{
-									alert("函数执行失败！")
+									alert("函数执行失败！");
+									location.reload();
 								})
 							}
 						}
@@ -482,9 +489,11 @@
 										ur.pictrues = res.data.pageInfo.list;
 									}else{
 										alert(res.data.msg);
+										location.reload();
 									}
 								}).catch(res=>{
-									alert("函数执行失败！")
+									alert("函数执行失败！");
+									location.reload();
 								})
 							}
 						}
