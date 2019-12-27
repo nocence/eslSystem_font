@@ -181,9 +181,11 @@
                             page(res.data.pageInfo.total,current_page,limit);
                         }else{
                             alert("查询数据失败！")
+                            windows.location.reload();
                         }
                     }).catch(res=>{
                         alert("函数执行失败！")
+                        windows.location.reload();
                     })
                 },
                 //单个消息已读更新函数
@@ -195,18 +197,25 @@
                     ).then(res=>{
                         if(res.data.code==200){
                             alert(res.data.msg);
+                            windows.location.reload();
+
                         }else {
                             alert(res.data.msg);
+                            windows.location.reload();
+
                         }
                     }).catch(res=>{
                         alert("函数执行失败");
+                        windows.location.reload();
+
                     })
                     this.updateParameter = null;
                 },
                 //全部消息已读更新函数
                 allCheckRead:function () {
                     for (i of this.msgs){
-                        if (i.isRead == "0"){
+                        console.log(i.esIsRead);
+                        if (i.esIsRead == 0){
                             this.updateParameter.push(i);
                         }
                     }
@@ -216,11 +225,17 @@
                     ).then(res=>{
                         if(res.data.code==200){
                             alert(res.data.msg);
+                            location.reload();
+
                         }else {
                             alert(res.data.msg);
+                            location.reload();
+
                         }
                     }).catch(res=>{
                         alert("函数执行失败");
+                        location.reload();
+
                     })
                     this.updateParameter = null;
                 }
