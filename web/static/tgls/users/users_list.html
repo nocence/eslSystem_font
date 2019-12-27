@@ -132,9 +132,11 @@
                         page(res.data.pageInfo.total,current_page,limit);
                     }else{
                         alert(res.data.msg);
+                        location.reload();
                     }
                 }).catch(res=>{
                     alert("函数执行失败！");
+                    location.reload();
                 });
                 //查询完后重置user实体
                 user = JSON.parse(sessionStorage.getItem("loginAdmin"));
@@ -156,9 +158,11 @@
                         this.thisRole = res.data.thisRole;
                     }else {
                         alert(res.data.msg);
+                        location.reload();
                     }
                 }).catch(res=>{
-                    alert("函数执行失败！")
+                    alert("函数执行失败！");
+                    location.reload();
                 })
             },
             //删除用户
@@ -170,6 +174,7 @@
                     delete_lay(new_user);
                 }else{
                     alert("无操作权限");
+                    location.reload();
                 }
                 this.reset();
             },
@@ -181,6 +186,7 @@
                     update_lay(new_user);
                 }else{
                     alert("无操作权限");
+                    location.reload();
                 }
                 this.reset();
             }
@@ -216,9 +222,11 @@
                                 ur.users = res.data.pageInfo.list;
                             }else{
                                 alert(res.data.msg);
+                                location.reload();
                             }
                         }).catch(res=>{
-                            alert("函数执行失败！")
+                            alert("函数执行失败！");
+                            location.reload();
                         })
 
                     }
@@ -259,7 +267,8 @@
                     location.reload();
                 }
             }).catch(res=>{
-                alert("函数执行失败！")
+                alert("函数执行失败！");
+                location.reload();
             });
         });
         $('body').on('click','#btn_no',function () {
@@ -353,11 +362,13 @@
                         })
                     }else{
                         alert(res.data.msg);
+                        location.reload();
                     }
                     //重新渲染Select元素
                     layui.form.render("select");
                 }).catch(res=>{
-                    alert("函数执行失败！")
+                    alert("函数执行失败！");
+                    location.reload();
                 });
                 layui.form.render();
 
@@ -402,6 +413,7 @@
                         //无返回信息时提示输入
                         if (layoutStr == "")
                             alert("请输入修改数据");
+                        location.reload();
                         else alert(layoutStr);
                     }).catch();
                 });

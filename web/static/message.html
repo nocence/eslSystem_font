@@ -180,12 +180,12 @@
                             //调用分页函数
                             page(res.data.pageInfo.total,current_page,limit);
                         }else{
-                            alert("查询数据失败！")
-                            windows.location.reload();
+                            alert("查询数据失败！");
+                            location.reload();
                         }
                     }).catch(res=>{
-                        alert("函数执行失败！")
-                        windows.location.reload();
+                        alert("函数执行失败！");
+                        location.reload();
                     })
                 },
                 //单个消息已读更新函数
@@ -197,24 +197,20 @@
                     ).then(res=>{
                         if(res.data.code==200){
                             alert(res.data.msg);
-                            windows.location.reload();
-
+                            location.reload();
                         }else {
                             alert(res.data.msg);
-                            windows.location.reload();
-
+                            location.reload();
                         }
                     }).catch(res=>{
                         alert("函数执行失败");
-                        windows.location.reload();
-
-                    })
+                        location.reload();
+                    });
                     this.updateParameter = null;
                 },
                 //全部消息已读更新函数
                 allCheckRead:function () {
                     for (i of this.msgs){
-                        console.log(i.esIsRead);
                         if (i.esIsRead == 0){
                             this.updateParameter.push(i);
                         }
@@ -226,17 +222,14 @@
                         if(res.data.code==200){
                             alert(res.data.msg);
                             location.reload();
-
                         }else {
                             alert(res.data.msg);
                             location.reload();
-
                         }
                     }).catch(res=>{
                         alert("函数执行失败");
                         location.reload();
-
-                    })
+                    });
                     this.updateParameter = null;
                 }
             },
@@ -271,9 +264,11 @@
                                     eu.msgs = res.data.pageInfo.list;
                                 }else{
                                     alert(res.data.msg);
+                                    location.reload();
                                 }
                             }).catch(res=>{
-                                alert("函数执行失败！")
+                                alert("函数执行失败！");
+                                location.reload();
                             })
                         }
                     }
