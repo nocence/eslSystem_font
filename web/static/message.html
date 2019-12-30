@@ -116,8 +116,15 @@
                         <td>{{i.goodsName}}</td>
                         <td>{{i.goodsSpecs}}</td>
                         <td>{{i.esTime}}</td>
-                        <td>{{i.esIsSuccess}}</td>
-                        <td>{{i.esIsRead}}</td>
+                        <td>
+                            <a v-if="i.esIsSuccess === 0">等待处理</a>
+                            <a v-else-if="i.esIsSuccess === 1">处理成功</a>
+                            <a v-else>处理失败</a>
+                        </td>
+                        <td>
+                            <a v-if="i.esIsRead === 0">未读</a>
+                            <a v-else>已读</a>
+                        </td>
                         <td>
                             <button v-if="i.esIsRead === 0" class="layui-btn layui-btn-xs" type="button" @click="checkRead(i)">标记为已读</button>
                             <label v-else class="layui-form-label">无</label>
