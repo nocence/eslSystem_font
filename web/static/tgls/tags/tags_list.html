@@ -84,8 +84,8 @@
 							<td>{{i.ptagIsuse}}</td>
 							<td>
 								<button class="layui-btn layui-btn-xs" type="button" @click="showAllInfo(i)">查看详细信息</button>
-								<button class="layui-btn layui-btn-xs" type="button" @click="changPw(i)">修改密码</button>
-                                <button class="layui-btn layui-btn-xs" type="button" @click="changMac(i)">修改MAC</button>
+								<button class="layui-btn layui-btn-xs" type="button" @click="changePw(i)">修改密码</button>
+                                <button class="layui-btn layui-btn-xs" type="button" @click="changeMac(i)">修改MAC</button>
 							</td>
 						</tr>
 					</tbody>
@@ -431,12 +431,12 @@
 						this.requestParameter1.goodsSpecs = "";
 						this.queryForImg();
 					},
-					changPw:function (new_tag) {
+					changePw:function (new_tag) {
 						this.setTagInfo.oldMac = new_tag.ptagMac;
 						this.setTagInfo.gatewayMac = new_tag.gatewayMac;
 						changePw_lay();
 					},
-                    changPw:function (new_tag) {
+                    changeMac:function (new_tag) {
                         this.setTagInfo.oldMac = new_tag.ptagMac;
                         this.setTagInfo.gatewayMac = new_tag.gatewayMac;
                         changeMac_lay()
@@ -464,7 +464,7 @@
 								'            <div class="layui-form-item">\n' +
 								'                <label class="layui-form-label">新密码</label>\n' +
 								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
-								'                    <input name="input_newPw" id="input_newPw" type="password" placeholder="例:112233445566"  autocomplete="off" class="layui-input">\n' +
+								'                    <input name="input_newPw" id="input_newPw" type="password" autocomplete="off" class="layui-input">\n' +
 								'                </div>\n' +
 								'            </div>\n' +
 								'            <div class="layui-form-item">\n' +
