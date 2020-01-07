@@ -84,6 +84,8 @@
 							<td>{{i.ptagIsuse}}</td>
 							<td>
 								<button class="layui-btn layui-btn-xs" type="button" @click="showAllInfo(i)">查看详细信息</button>
+								<button class="layui-btn layui-btn-xs" type="button" @click="changePw(i)">修改密码</button>
+                                <button class="layui-btn layui-btn-xs" type="button" @click="changeMac(i)">修改MAC</button>
 							</td>
 						</tr>
 					</tbody>
@@ -196,7 +198,7 @@
 			//默认每页容量
 			var limit = 10;
 
-			new Vue({
+			var eu = new Vue({
 				el:"#myVue",
 				data:{
 					priceTags:[],
@@ -254,6 +256,14 @@
 						goodsSpecs:"",
 						pageNum:"",
 						pageSize:"",
+					},
+					//修改价签密码与MAC所使用的参数类
+					setTagInfo:{
+						gatewayMac:"",
+						oldMac:"",
+						newMac:"",
+						oldPwd:"",
+						newPwd:""
 					}
 				},
 				methods:{
@@ -420,13 +430,144 @@
 						this.requestParameter1.goodsName = "";
 						this.requestParameter1.goodsSpecs = "";
 						this.queryForImg();
-					}
+					},
+					changePw:function (new_tag) {
+						this.setTagInfo.oldMac = new_tag.ptagMac;
+						this.setTagInfo.gatewayMac = new_tag.gatewayMac;
+						changePw_lay();
+					},
+                    changeMac:function (new_tag) {
+                        this.setTagInfo.oldMac = new_tag.ptagMac;
+                        this.setTagInfo.gatewayMac = new_tag.gatewayMac;
+                        changeMac_lay()
+                    }
 				},
 				created:function(){
 					this.query();
 				}
 			});
 
+			//修改价签密码弹出层
+			function changePw_lay() {
+				layui.use(['layer', 'form'], function () {
+					layer.open({
+						type: 1,
+						title: "修改信息",
+						area: ["500px", "300px"],
+						content: '        <form class="layui-form" style="padding-top:30px;width: 500px;">\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <label class="layui-form-label">旧密码</label>\n' +
+								'                <div class="layui-input-inline" style="width: 350px;">\n' +
+								'                   <input name="input_oldPw" id="input_oldPw" type="password" class="layui-input">\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <label class="layui-form-label">新密码</label>\n' +
+								'                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+								'                    <input name="input_newPw" id="input_newPw" type="password" autocomplete="off" class="layui-input">\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								'            <div class="layui-form-item">\n' +
+								'                <div class="layui-input-block">\n' +
+								'                    <p>*不做更改项请留空</p>\n' +
+								'                    <button lay-submit lay-filter="btn_yes" class="layui-btn layui-btn-sm" type="button" id="btn_yes">立即提交</button>\n' +
+								'                    <button class="layui-btn layui-btn-sm" type="button" id="btn_no">取消</button>\n' +
+								'                </div>\n' +
+								'            </div>\n' +
+								' 		  </form>'
+					});
+					$('body').on('click', '#btn_no', function () {
+						layer.close(layer.index);
+						location.reload();
+					});
+				});
+				layui.use('form', function(){
+					var form = layui.form;
+					//渲染表单
+					layui.form.render();
+
+					form.on('submit(btn_yes)', function (data) {
+						eu.setTagInfo.oldPwd = data.field.input_oldPw;
+						eu.setTagInfo.newPwd = data.field.input_newPw;
+						sendAxios(
+								"pricetag/changeTagPassword",
+								eu.setTagInfo
+						).then(res=>{
+							if (res.data.code == 200){
+								alert(res.data.msg);
+								location.reload();
+							}else {
+								alert(res.data.msg);
+								location.reload();
+							}
+						}).catch(res=>{
+							alert("函数执行失败！");
+							location.reload();
+						});
+					});
+				});
+			}
+
+            //修改价签MAC弹出层
+            function changeMac_lay() {
+                layui.use(['layer', 'form'], function () {
+                    layer.open({
+                        type: 1,
+                        title: "修改信息",
+                        area: ["500px", "300px"],
+                        content: '        <form class="layui-form" style="padding-top:30px;width: 500px;">\n' +
+                            '            <div class="layui-form-item">\n' +
+                            '                <label class="layui-form-label">密码</label>\n' +
+                            '                <div class="layui-input-inline" style="width: 350px;">\n' +
+                            '                   <input name="input_Pw" id="input_Pw" type="password" class="layui-input">\n' +
+                            '                </div>\n' +
+                            '            </div>\n' +
+                            '            <div class="layui-form-item">\n' +
+                            '                <label class="layui-form-label">新Mac地址</label>\n' +
+                            '                <div class="layui-input-inline Input" style="width: 350px;">\n' +
+                            '                    <input name="input_Mac" id="input_Mac" type="text" placeholder="例:112233445566"  autocomplete="off" class="layui-input">\n' +
+                            '                </div>\n' +
+                            '            </div>\n' +
+                            '            <div class="layui-form-item">\n' +
+                            '                <div class="layui-input-block">\n' +
+                            '                    <p>*不做更改项请留空</p>\n' +
+                            '                    <button lay-submit lay-filter="btn_yes" class="layui-btn layui-btn-sm" type="button" id="btn_yes">立即提交</button>\n' +
+                            '                    <button class="layui-btn layui-btn-sm" type="button" id="btn_no">取消</button>\n' +
+                            '                </div>\n' +
+                            '            </div>\n' +
+                            ' 		  </form>'
+                    });
+                    $('body').on('click', '#btn_no', function () {
+                        layer.close(layer.index);
+                        location.reload();
+                    });
+                });
+                layui.use('form', function(){
+                    var form = layui.form;
+                    //渲染表单
+                    layui.form.render();
+
+                    form.on('submit(btn_yes)', function (data) {
+                        eu.setTagInfo.oldPwd = data.field.input_Pw;
+                        eu.setTagInfo.newMac = data.field.input_Mac;
+                        sendAxios(
+                            "pricetag/changeTagMac",
+                            eu.setTagInfo
+                        ).then(res=>{
+                            if (res.data.code == 200){
+                                alert(res.data.msg);
+                                location.reload();
+                            }else {
+                                alert(res.data.msg);
+                                location.reload();
+                            }
+                        }).catch(res=>{
+                            alert("函数执行失败！");
+                            location.reload();
+                        });
+                    });
+                });
+            }
 
 			//分页函数
 			//参数：查询总条数，当前页数，每页上限
@@ -443,7 +584,6 @@
 							//第一次不执行防止死循环
 							if(!first){
 								curr = obj.curr;
-
 								eu.requestParameter.pageNum = curr;
 								eu.requestParameter.pageSize = limit;
 								sendAxios(
@@ -451,7 +591,7 @@
 										eu.requestParameter
 								).then(res=>{
 									if(res.data.code==200){
-										ur.priceTags = res.data.pageInfo.list;
+										eu.priceTags = res.data.pageInfo.list;
 									}else{
 										alert(res.data.msg);
 										location.reload();
@@ -486,7 +626,7 @@
 										eu.requestParameter1
 								).then(res=>{
 									if(res.data.code==200){
-										ur.pictrues = res.data.pageInfo.list;
+										eu.pictrues = res.data.pageInfo.list;
 									}else{
 										alert(res.data.msg);
 										location.reload();
