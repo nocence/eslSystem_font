@@ -61,7 +61,7 @@
                             </div>
                             <label class="layui-form-label">是否已读</label>
                             <div class="layui-input-inline">
-                                <select lay-filter="isReadFlag">
+                                <select lay-filter="isReadFlag" required>
                                     <option value=null>不限</option>
                                     <option value="1">已读</option>
                                     <option value="0">未读</option>
@@ -69,7 +69,7 @@
                             </div>
                             <label class="layui-form-label">消息状态</label>
                             <div class="layui-input-inline">
-                                <select lay-filter="isSuccessFlag">
+                                <select lay-filter="isSuccessFlag" required>
                                     <option value=null>不限</option>
                                     <option value="0">待处理</option>
                                     <option value="1">处理成功</option>
@@ -115,7 +115,7 @@
                         <td>{{i.etagMac}}</td>
                         <td>{{i.goodsName}}</td>
                         <td>{{i.goodsSpecs}}</td>
-                        <td>{{i.esTime}}</td>
+                        <td>{{i.esTime.toString()}}</td>
                         <td>
                             <a v-if="i.esIsSuccess === 0">等待处理</a>
                             <a v-else-if="i.esIsSuccess === 1">处理成功</a>
@@ -186,16 +186,24 @@
                     ).then(res=>{
                         if(res.data.code==200){
                             this.msgs =res.data.pageInfo.list;
+                            for (i of this.msgs) {
+                                var tempTime = new Date(i.esTime);
+                                var Y = tempTime.getFullYear() + '-';
+                                var M = (tempTime.getMonth()+1 < 10 ? '0'+(tempTime.getMonth()+1) : tempTime.getMonth()+1) + '-';
+                                var D = tempTime.getDate() + ' ';
+                                var h = tempTime.getHours() + ':';
+                                var m = tempTime.getMinutes() + ':';
+                                var s = tempTime.getSeconds();
+                                i.esTime = Y+M+D+h+m+s;
+                            }
+
                             //调用分页函数
                             page(res.data.pageInfo.total,current_page,limit);
                         }else{
                             alert("查询数据失败！");
                             location.reload();
                         }
-                    }).catch(res=>{
-                        alert("函数执行失败！");
-                        location.reload();
-                    })
+                    }).catch()
                 },
                 //单个消息已读更新函数
                 checkRead:function (new_msg) {
@@ -274,6 +282,16 @@
                             ).then(res=>{
                                 if(res.data.code==200){
                                     eu.msgs = res.data.pageInfo.list;
+                                    for (i of this.msgs) {
+                                        var tempTime = new Date(i.esTime);
+                                        var Y = tempTime.getFullYear() + '-';
+                                        var M = (tempTime.getMonth()+1 < 10 ? '0'+(tempTime.getMonth()+1) : tempTime.getMonth()+1) + '-';
+                                        var D = tempTime.getDate() + ' ';
+                                        var h = tempTime.getHours() + ':';
+                                        var m = tempTime.getMinutes() + ':';
+                                        var s = tempTime.getSeconds();
+                                        i.esTime = Y+M+D+h+m+s;
+                                    }
                                 }else{
                                     alert(res.data.msg);
                                     location.reload();
@@ -287,18 +305,23 @@
                 });
             });
         }
-        //时间选项卡
-        layui.use(['element', 'form','laydate'], function () {
+
+        //加载layui_form
+        layui.use('form', function(){
             var form = layui.form;
+            //检测下拉选择事件
+            //通过lay-filter进行检测，并且获取value
             form.on('select(isReadFlag)',function (data) {
-                eu.requestParameter.isRead = data.value;
+                eu.requestParameter.esIsRead = data.value;
             });
             form.on('select(isSuccessFlag)',function (data) {
-                eu.requestParameter.isSuccess = data.value;
+                eu.requestParameter.esIsSuccess = data.value;
             });
+        });
 
+        //时间选项卡
+        layui.use(['element', 'form','laydate'], function () {
             var laydate = layui.laydate;
-
             //选择开始时间
             laydate.render({
                 elem:'#dateInput',
@@ -306,7 +329,12 @@
                 format:'yyyy-MM-dd H:mm',
                 max:Date.now(),
                 done:function (value, date) {
-                    eu.requestParameter.startTime = date;
+                    eu.requestParameter.startTime = date.year+'-'+
+                                                    date.month+'-'+
+                                                    date.date+' '+
+                                                    date.hours+':'+
+                                                    date.minutes+':'+
+                                                    date.seconds;
                 }
             });
             //时间范围
@@ -315,7 +343,12 @@
                 , type: 'datetime'
                 , format: 'yyyy-MM-dd H:mm'
                 , done:function (value, date) {
-                    eu.requestParameter.endTime = date;
+                    eu.requestParameter.endTime = date.year+'-'+
+                                                date.month+'-'+
+                                                date.date+' '+
+                                                date.hours+':'+
+                                                date.minutes+':'+
+                                                date.seconds;
                 }
             });
 
