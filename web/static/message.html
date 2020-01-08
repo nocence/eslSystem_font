@@ -115,7 +115,7 @@
                         <td>{{i.etagMac}}</td>
                         <td>{{i.goodsName}}</td>
                         <td>{{i.goodsSpecs}}</td>
-                        <td>{{i.esTime}}</td>
+                        <td>{{i.esTime.toString()}}</td>
                         <td>
                             <a v-if="i.esIsSuccess === 0">等待处理</a>
                             <a v-else-if="i.esIsSuccess === 1">处理成功</a>
@@ -186,16 +186,24 @@
                     ).then(res=>{
                         if(res.data.code==200){
                             this.msgs =res.data.pageInfo.list;
+                            for (i of this.msgs) {
+                                var tempTime = new Date(i.esTime);
+                                var Y = tempTime.getFullYear() + '-';
+                                var M = (tempTime.getMonth()+1 < 10 ? '0'+(tempTime.getMonth()+1) : tempTime.getMonth()+1) + '-';
+                                var D = tempTime.getDate() + ' ';
+                                var h = tempTime.getHours() + ':';
+                                var m = tempTime.getMinutes() + ':';
+                                var s = tempTime.getSeconds();
+                                i.esTime = Y+M+D+h+m+s;
+                            }
+
                             //调用分页函数
                             page(res.data.pageInfo.total,current_page,limit);
                         }else{
                             alert("查询数据失败！");
                             location.reload();
                         }
-                    }).catch(res=>{
-                        alert("函数执行失败！");
-                        location.reload();
-                    })
+                    }).catch()
                 },
                 //单个消息已读更新函数
                 checkRead:function (new_msg) {
@@ -274,6 +282,16 @@
                             ).then(res=>{
                                 if(res.data.code==200){
                                     eu.msgs = res.data.pageInfo.list;
+                                    for (i of this.msgs) {
+                                        var tempTime = new Date(i.esTime);
+                                        var Y = tempTime.getFullYear() + '-';
+                                        var M = (tempTime.getMonth()+1 < 10 ? '0'+(tempTime.getMonth()+1) : tempTime.getMonth()+1) + '-';
+                                        var D = tempTime.getDate() + ' ';
+                                        var h = tempTime.getHours() + ':';
+                                        var m = tempTime.getMinutes() + ':';
+                                        var s = tempTime.getSeconds();
+                                        i.esTime = Y+M+D+h+m+s;
+                                    }
                                 }else{
                                     alert(res.data.msg);
                                     location.reload();
