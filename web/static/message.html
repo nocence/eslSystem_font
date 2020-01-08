@@ -329,7 +329,12 @@
                 format:'yyyy-MM-dd H:mm',
                 max:Date.now(),
                 done:function (value, date) {
-                    eu.requestParameter.startTime = date;
+                    eu.requestParameter.startTime = date.year+'-'+
+                                                    date.month+'-'+
+                                                    date.date+' '+
+                                                    date.hours+':'+
+                                                    date.minutes+':'+
+                                                    date.seconds;
                 }
             });
             //时间范围
@@ -338,7 +343,12 @@
                 , type: 'datetime'
                 , format: 'yyyy-MM-dd H:mm'
                 , done:function (value, date) {
-                    eu.requestParameter.endTime = date;
+                    eu.requestParameter.endTime = date.year+'-'+
+                                                date.month+'-'+
+                                                date.date+' '+
+                                                date.hours+':'+
+                                                date.minutes+':'+
+                                                date.seconds;
                 }
             });
 
