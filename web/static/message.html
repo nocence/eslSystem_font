@@ -61,7 +61,7 @@
                             </div>
                             <label class="layui-form-label">是否已读</label>
                             <div class="layui-input-inline">
-                                <select lay-filter="isReadFlag">
+                                <select lay-filter="isReadFlag" required>
                                     <option value=null>不限</option>
                                     <option value="1">已读</option>
                                     <option value="0">未读</option>
@@ -69,7 +69,7 @@
                             </div>
                             <label class="layui-form-label">消息状态</label>
                             <div class="layui-input-inline">
-                                <select lay-filter="isSuccessFlag">
+                                <select lay-filter="isSuccessFlag" required>
                                     <option value=null>不限</option>
                                     <option value="0">待处理</option>
                                     <option value="1">处理成功</option>
@@ -287,18 +287,23 @@
                 });
             });
         }
-        //时间选项卡
-        layui.use(['element', 'form','laydate'], function () {
+
+        //加载layui_form
+        layui.use('form', function(){
             var form = layui.form;
+            //检测下拉选择事件
+            //通过lay-filter进行检测，并且获取value
             form.on('select(isReadFlag)',function (data) {
-                eu.requestParameter.isRead = data.value;
+                eu.requestParameter.esIsRead = data.value;
             });
             form.on('select(isSuccessFlag)',function (data) {
-                eu.requestParameter.isSuccess = data.value;
+                eu.requestParameter.esIsSuccess = data.value;
             });
+        });
 
+        //时间选项卡
+        layui.use(['element', 'form','laydate'], function () {
             var laydate = layui.laydate;
-
             //选择开始时间
             laydate.render({
                 elem:'#dateInput',
