@@ -175,7 +175,9 @@
             },
             methods:{
                 query:function () {
-                    this.requestParameter.userName = user.userName;
+                    if(this.requestParameter.userName == ""){
+                        this.requestParameter.userName = user.userName;
+                    }
                     this.requestParameter.pageNum = current_page;
                     this.requestParameter.pageSize = limit;
                     sendAxios(
@@ -238,6 +240,9 @@
                         location.reload();
                     });
                     this.updateParameter = null;
+                },
+                reset:function () {
+                    location.reload();
                 }
             },
             created:function(){
